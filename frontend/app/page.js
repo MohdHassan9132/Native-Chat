@@ -24,7 +24,7 @@ export default function Home() {
     });
 
     // Server → React
-    socket.on("message", (data) => {
+    socket.on("new", (data) => {
       console.log("Message received from server:", data);
 
       setMessages((previousMessages) => [
@@ -51,7 +51,7 @@ export default function Home() {
       return;
     }
 
-    socketRef.current.emit("message", {
+    socketRef.current.emit("send", {
       message: message,
     });
 
