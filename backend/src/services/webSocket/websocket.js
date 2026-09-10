@@ -1,5 +1,4 @@
 import { Server } from "socket.io"
-import { eventRouter } from "../../router/event.router.js"
 class WebSocket{
     constructor(httpServer){
         this.server = new Server(httpServer,{
@@ -12,6 +11,9 @@ class WebSocket{
     emitToClients(event,message){
         console.log(`emitting this message to the clients with eventName$`,event,message)
         this.server.emit(event,{message})
+    }
+    emitToSocketId(socketId,message){
+        this.server.to(socketId).emit('new',message)
     }
     
 

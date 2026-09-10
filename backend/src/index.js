@@ -83,7 +83,7 @@ httpServer.listen(process.env.PORT || 8000,()=>{
     console.log(`httpServer is running on the PORT${process.env.PORT || 8000}`)
 })
 
-
+export{userService}
 
 
 
