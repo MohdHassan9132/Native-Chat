@@ -54,6 +54,7 @@ import Redis from './services/redis/redis.js';
 import WebSocket from './services/webSocket/websocket.js';
 import MessageService from './services/messages/messages.js';
 import { eventRouter } from './router/event.router.js';
+import UserService from './services/user/user.service.js';
 const httpServer = http.createServer((req, res) => {
     if (req.method === 'GET') {
         res.writeHead(200, { "content-type": "application/json" });
@@ -64,10 +65,14 @@ const httpServer = http.createServer((req, res) => {
 
 });
 const webSocket = new WebSocket(httpServer)
+const userService = new UserService()
 
 const redis = new Redis()
 const messagingService = new MessageService(redis,webSocket)
 webSocket.initListeners((socket)=>{
+    userService.insertUser({
+        username: socket.handshake.query.username,
+        socketId: socket.id    })
     eventRouter(socket,messagingService)
 })
 

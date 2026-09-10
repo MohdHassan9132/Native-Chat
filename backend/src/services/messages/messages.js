@@ -5,8 +5,8 @@ class MessageService{
         this.webSocket = webSocket,
         this.redis = redis
     }
-    sendMessage(eventName,message){
-        console.log(`recieved message from router with event  redirecting to clients`,eventName,message)
+    sendMessage(socket,message){
+        
         this.webSocket.emitToClients("new",message)
     }
     delieverMessage(event){
