@@ -1,17 +1,32 @@
-class UserService{
-    constructor(){
+class UserService {
+
+    constructor() {
+
         this.userMap = new Map()
     }
+
     insertUser({
         username,
         socketId,
-    }){
-        this.userMap.set(username,socketId)
+        serverId
+    }) {
+
+        this.userMap.set(username, {
+            socketId,
+            serverId
+        })
         console.log(this.userMap)
     }
-    findUserSocketId(username){
-        const socketId = this.userMap.get(username)
-        return socketId;
+
+    findUser(username) {
+
+        return this.userMap.get(username)
+    }
+
+    removeUser(username) {
+
+        this.userMap.delete(username)
     }
 }
+
 export default UserService

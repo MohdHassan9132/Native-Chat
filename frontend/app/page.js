@@ -19,7 +19,7 @@ export default function Home() {
     if (!username) return;
 
     // Pass your username in the query so backend's UserService can map it
-    const socket = io("http://localhost:8000", {
+    const socket = io(process.env.NEXT_PUBLIC_BACKEND_URL, {
       query: {
         username: username,
       },
@@ -64,12 +64,12 @@ export default function Home() {
     }
 
     // Construct the payload expected by your backend message configuration
-    const messagePayload = {
-      username: recipient.trim(), // Backend uses this to find receiver's socketId
-      senderName: username,
-      text: message.trim(),
-      timestamp: Date.now(),
-    };
+const messagePayload = {
+  recieverName: recipient.trim(),
+  senderName: username,
+  text: message.trim(),
+  timestamp: Date.now(),
+};
 
     // Emit wrapped in { message: ... } to match args.message in backend eventRouter
     socketRef.current.emit("send", {

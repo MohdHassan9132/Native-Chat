@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "dev2": "cross-env NEXT_DIST_DIR=.next-3001 NEXT_PUBLIC_BACKEND_URL=http://localhost:8001 next dev -p 3001"
   },
   "dependencies": {
     "cross-env": "^10.1.0",
