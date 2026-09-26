@@ -1,11 +1,13 @@
+import 'dotenv/config'
 import http from "http"
-
 import Redis from "./services/redis/redis.js"
 import WebSocket from "./services/webSocket/websocket.js"
 import MessageService from "./services/messages/messages.js"
 import UserService from "./services/user/user.service.js"
-
 import { eventRouter } from "./router/event.router.js"
+import { userRepo } from "./repository/ user.repo.js"
+
+
 const httpServer = http.createServer((req, res) => {
 
     if (req.method === "GET") {
@@ -50,7 +52,7 @@ await redis.redisSubscriber(
     }
 )
 
-webSocket.initListeners((socket) => {
+webSocket.initListeners(async (socket) => {
 
     const username =
         socket.handshake.query.username
@@ -60,6 +62,10 @@ webSocket.initListeners((socket) => {
         socketId: socket.id,
         serverId
     })
+    const dbUser = await userRepo.create({
+        username
+    })
+    console.log(dbUser)
 
     eventRouter(
         socket,
