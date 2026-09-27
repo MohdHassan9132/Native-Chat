@@ -1,1 +1,0 @@
-This is a 5th semester software engineering project name NativeChat. This is a fully scalable chat app for browser and apple and ios.

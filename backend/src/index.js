@@ -1,84 +1,60 @@
-import 'dotenv/config'
-import http from "http"
-import Redis from "./services/redis/redis.js"
-import WebSocket from "./services/webSocket/websocket.js"
-import MessageService from "./services/messages/messages.js"
-import UserService from "./services/user/user.service.js"
-import { eventRouter } from "./router/event.router.js"
-import { userRepo } from "./repository/ user.repo.js"
+import "dotenv/config";
+import http from "http";
+import app from "./app.js";
 
+import Redis from "./services/redis/redis.js";
+import WebSocket from "./services/webSocket/websocket.js";
+import MessageService from "./services/messages/messages.js";
 
-const httpServer = http.createServer((req, res) => {
+import { userService } from "./services/user/user.service.js";
+import { eventRouter } from "./router/event.router.js";
+import { userRepo } from "./repository/ user.repo.js";
 
-    if (req.method === "GET") {
+const PORT = process.env.PORT || 8000;
+const SERVER_ID = process.env.SERVER_ID || `server-${PORT}`;
 
-        res.writeHead(200, {
-            "content-type": "application/json"
-        })
+const httpServer = http.createServer(app);
 
-        res.end(
-            JSON.stringify({
-                message: "Hello from backend"
-            })
-        )
-    }
-})
+const webSocket = new WebSocket(httpServer);
+const redis = new Redis();
 
-
-const serverId = process.env.PORT || 8000
-const webSocket = new WebSocket(
-    httpServer
-)
-
-const userService = new UserService()
-const redis = new Redis()
 const messagingService = new MessageService(
     userService,
     redis,
     webSocket,
-    serverId
-)
-await redis.initRedis()
-await redis.redisSubscriber(
-    "messages",
-    (data) => {
+    SERVER_ID
+);
 
-        const message =
-            JSON.parse(data)
+await redis.initRedis();
 
-        messagingService.deliverMessage(
-            message
-        )
-    }
-)
+await redis.redisSubscriber("messages", (data) => {
+    const message = JSON.parse(data);
+
+    messagingService.deliverMessage(message);
+});
 
 webSocket.initListeners(async (socket) => {
 
-    const username =
-        socket.handshake.query.username
+    const username = socket.handshake.query.username;
 
     userService.insertUser({
         username,
         socketId: socket.id,
-        serverId
-    })
+        serverId: SERVER_ID
+    });
+
     const dbUser = await userRepo.create({
         username
-    })
-    console.log(dbUser)
+    });
+
+    console.log(dbUser);
 
     eventRouter(
         socket,
         messagingService
-    )
-})
+    );
+});
 
-
-httpServer.listen(
-    serverId,
-    () => {
-        console.log(
-            `httpServer is running on PORT ${serverId}`
-        )
-    }
-)
+httpServer.listen(PORT, () => {
+    console.log(`Server is listening on PORT ${PORT}`);
+});

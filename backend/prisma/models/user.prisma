@@ -1,13 +1,14 @@
 model User {
   userId           String    @id @default(uuid())
   name             String
-  phoneNumber      String?
+  phoneNumber      String? @unique
   profilePicture   Json?
   bio              String?
   createdAt        DateTime?
   updatedAt        DateTime?
   lastSeen         DateTime?
   status           String?
+  refreshToken     String?
   isBlocked        Boolean   @default(false)
 
   sentMessages     Message[] @relation("SentMessages")
