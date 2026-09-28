@@ -1,4 +1,5 @@
 import Image from "next/image";
+import PillButton from "@/components/shared/PillButton";
 import { maskPhone } from "./OtpPhoneInfo";
 
 export default function OtpSuccess({ country, phone }) {
@@ -41,16 +42,12 @@ export default function OtpSuccess({ country, phone }) {
         </svg>
       </div>
 
-      {/* No profile-setup route exists yet (out of scope here) — mock CTA only */}
-      <button
-        type="button"
-        className="w-full py-3.5 px-4 rounded-full bg-brand-cyan text-brand-charcoal text-base font-extrabold ink-border shadow-ink hand-wiggle flex items-center justify-center gap-2"
-      >
+      <PillButton href="/initials" variant="primary" className="w-full justify-center py-3.5 text-base">
         <span>Create your profile</span>
         <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </button>
+      </PillButton>
     </div>
   );
 }
