@@ -46,6 +46,16 @@
   box-shadow: var(--shadow-ink-active);
 }
 
+/* Hides the scrollbar on horizontally-scrollable rows (stories, filter
+   chips) while keeping touch/wheel scroll — see Home screen. */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* OTP incorrect-attempt shake — see DESIGN.md, OTP Code Cells */
 @keyframes shake {
   10%,

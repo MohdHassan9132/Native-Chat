@@ -47,9 +47,12 @@ export default function InitialDetailsPage() {
     bioTextareaRef.current?.focus();
   }
 
-  // UI-only: no "main app" / next-onboarding route exists yet in this
-  // codebase, so there's nothing to navigate to — see final report.
-  function handleContinue() {}
+  // UI-only: no profile is actually created/persisted — just completes the
+  // onboarding flow by moving to the main Chats screen.
+  function handleContinue() {
+    if (!canContinue) return;
+    router.push("/home");
+  }
 
   return (
     <>
