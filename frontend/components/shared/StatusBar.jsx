@@ -1,8 +1,7 @@
-// Decorative status bar for the self-contained phone-frame mockup used on
-// this screen only (see DESIGN.md discussion in the Home implementation —
-// unlike the full-page Login/Verification/Initials screens, /home renders
-// as a bordered device frame, so a matching illustrated status bar belongs
-// inside it rather than relying on the visitor's real browser chrome).
+// Decorative status bar shared by the mobile-app screens whose reference
+// designs simulate a device status bar (Home, Chat). Intentionally not
+// used on Login/Verification/Initials, which render as plain full-page
+// content rather than a simulated device viewport.
 export default function StatusBar() {
   return (
     <div

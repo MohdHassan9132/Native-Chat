@@ -1,17 +1,22 @@
+import Link from "next/link";
+
 const CHECK_CLASSES = {
   read: "text-brand-cyanDark",
   sent: "text-neutral-500",
   delivered: "text-emerald-500",
 };
 
+// UI phase: every conversation card opens the same mock chat. Once real
+// conversations exist, swap this for `conversation.id` in the href below —
+// nothing else about this component (or the /chat/[id] route) changes.
+const MOCK_CONVERSATION_ID = "ahmad-syarif";
+
 export default function ChatListItem({ conversation }) {
   const { name, preview, clamp, time, check, unread, online, bg, Avatar } = conversation;
 
   return (
-    // No chat-detail route exists yet — a real, accessible, pressable
-    // control with no destination (see navigation skill: no href="#").
-    <button
-      type="button"
+    <Link
+      href={`/chat/${MOCK_CONVERSATION_ID}`}
       className="w-full text-left bg-white p-3 rounded-2xl ink-border shadow-ink-sm flex items-center justify-between active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyanDark"
     >
       <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -55,6 +60,6 @@ export default function ChatListItem({ conversation }) {
           </span>
         )}
       </div>
-    </button>
+    </Link>
   );
 }

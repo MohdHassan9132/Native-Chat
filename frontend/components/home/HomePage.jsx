@@ -1,4 +1,4 @@
-import StatusBar from "./StatusBar";
+import StatusBar from "@/components/shared/StatusBar";
 import HomeHeader from "./HomeHeader";
 import StoriesRow from "./StoriesRow";
 import ChatFilters from "./ChatFilters";
