@@ -1,27 +1,18 @@
-import Link from "next/link";
+import LoginPage from "@/components/login/LoginPage";
+import { getCountries, DEFAULT_COUNTRY_CCA2 } from "@/lib/countries";
 
 export const metadata = {
   title: "Log In — nativeChat",
-  description: "Log in to nativeChat.",
+  description: "Verify your mobile number to log in to nativeChat.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
-// Placeholder route only — the real Login screen (UI/Login/) is out of scope
-// for this implementation. No auth, OTP, or backend calls here.
-export default function LoginPage() {
-  return (
-    <main className="flex-1 flex min-h-screen items-center justify-center p-8 bg-brand-warmCanvas text-brand-charcoal">
-      <div className="text-center max-w-sm">
-        <h1 className="text-2xl font-extrabold tracking-tight mb-2">Log In</h1>
-        <p className="text-sm text-neutral-600 font-medium mb-6">
-          The login screen is coming soon.
-        </p>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-white text-brand-charcoal text-sm font-bold px-6 py-2.5 rounded-full ink-border shadow-ink-sm hand-wiggle"
-        >
-          Back to home
-        </Link>
-      </div>
-    </main>
-  );
+export default function Login() {
+  const countries = getCountries();
+  const defaultCountry = countries.find((c) => c.cca2 === DEFAULT_COUNTRY_CCA2) ?? countries[0];
+
+  return <LoginPage countries={countries} defaultCountry={defaultCountry} />;
 }

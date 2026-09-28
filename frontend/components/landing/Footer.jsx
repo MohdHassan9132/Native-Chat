@@ -1,4 +1,4 @@
-import LogoLockup from "./LogoLockup";
+import LogoLockup from "@/components/shared/LogoLockup";
 
 const FOOTER_LINKS = [
   { href: "#hero", label: "Home" },

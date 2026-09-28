@@ -5,30 +5,48 @@ const VARIANTS = {
   secondary: "bg-white text-brand-charcoal",
 };
 
+const DISABLED_CLASSES =
+  "bg-brand-surface text-neutral-400 border-2 border-neutral-300 shadow-none pointer-events-none";
+
 /**
- * Shared tactile "ink" pill CTA. Renders a Next.js Link for internal routes
- * or a plain anchor for in-page hashes, keeping one visual component for
- * both nav/CTA use cases (see DESIGN.md — Primary CTA button).
+ * Shared tactile "ink" pill CTA. Renders a Next.js Link/anchor when `href`
+ * is given (nav/CTA use case), or a real <button> when it's omitted (form
+ * actions, e.g. Login's Continue). One visual component for both, per
+ * DESIGN.md — Primary CTA button / Disabled State.
  */
 export default function PillButton({
   href,
   variant = "primary",
   className = "",
+  disabled = false,
+  type = "button",
+  onClick,
   children,
 }) {
-  const classes = `${VARIANTS[variant]} font-bold rounded-full ink-border shadow-ink-sm hover:shadow-ink hand-wiggle inline-flex items-center gap-2 ${className}`;
+  const base = "font-bold rounded-full inline-flex items-center gap-2 transition-all";
+  const interactive = disabled
+    ? DISABLED_CLASSES
+    : `${VARIANTS[variant]} ink-border shadow-ink-sm hover:shadow-ink hand-wiggle`;
+  const classes = `${base} ${interactive} ${className}`;
 
-  if (href.startsWith("#")) {
+  if (href) {
+    if (href.startsWith("#")) {
+      return (
+        <a href={href} className={classes}>
+          {children}
+        </a>
+      );
+    }
     return (
-      <a href={href} className={classes}>
+      <Link href={href} className={classes}>
         {children}
-      </a>
+      </Link>
     );
   }
 
   return (
-    <Link href={href} className={classes}>
+    <button type={type} disabled={disabled} onClick={onClick} className={classes}>
       {children}
-    </Link>
+    </button>
   );
 }

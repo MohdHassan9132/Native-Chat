@@ -1,5 +1,5 @@
-import LogoLockup from "./LogoLockup";
-import PillButton from "./PillButton";
+import LogoLockup from "@/components/shared/LogoLockup";
+import PillButton from "@/components/shared/PillButton";
 
 const NAV_LINKS = [
   { href: "#hero", label: "Home" },

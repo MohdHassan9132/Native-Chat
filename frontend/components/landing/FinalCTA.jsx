@@ -1,4 +1,4 @@
-import PillButton from "./PillButton";
+import PillButton from "@/components/shared/PillButton";
 
 export default function FinalCTA() {
   return (
