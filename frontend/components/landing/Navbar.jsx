@@ -1,3 +1,6 @@
+"use client";
+
+import { useIsLoggedIn } from "@/lib/auth";
 import LogoLockup from "@/components/shared/LogoLockup";
 import PillButton from "@/components/shared/PillButton";
 
@@ -8,6 +11,7 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
+  const loggedIn = useIsLoggedIn();
   return (
     <header className="sticky top-0 z-50 bg-brand-warmCanvas/90 backdrop-blur-md border-b-2 border-brand-charcoal">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -29,7 +33,7 @@ export default function Navbar() {
 
         {/* Log In only — no Sign Up button, per design reference */}
         <div className="flex items-center gap-3">
-          <PillButton href="/login" variant="secondary" className="text-sm px-6 py-2.5">
+          <PillButton href={loggedIn ? "/home" : "/login"} variant="secondary" className="text-sm px-6 py-2.5">
             <span>Log In</span>
             <svg
               className="w-4 h-4"

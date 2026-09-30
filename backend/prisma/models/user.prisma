@@ -13,4 +13,7 @@ model User {
 
   sentMessages     Message[] @relation("SentMessages")
   receivedMessages Message[] @relation("ReceivedMessages")
+
+  user1Chats Chat[] @relation("User1Chats")
+  user2Chats Chat[] @relation("User2Chats")
 }

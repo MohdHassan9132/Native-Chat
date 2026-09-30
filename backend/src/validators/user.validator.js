@@ -4,7 +4,7 @@ import { ApiError } from "../utils/api.error.js";
 const nameSchema = z
   .string()
   .min(2, "Name must be at least 2 characters")
-  .max(50, "Name must be at most 50 characters");
+  .max(50, "Name must be at most 30 characters");
 
 const validateName = (name) => {
 
@@ -27,7 +27,19 @@ const validatePhoneNumber = (phoneNumber)=>{
   return result.data;
 }
 
+const bioSchema = z.string().min(10).max(60).regex(/^[A-Za-z0-9@_ .,!?'-]+$/)
+
+const validateBio = (bio)=>{
+  const result = bioSchema.safeParse(bio)
+  if(!result.success){
+    throw new ApiError(400,result.error.issues[0].message)
+  }
+  return result.data
+}
+
+
 export {
   validateName,
-  validatePhoneNumber
+  validatePhoneNumber,
+  validateBio
 };

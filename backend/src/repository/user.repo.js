@@ -1,12 +1,13 @@
 import {prisma} from '../db/index.js'
 
 class UserRepo{
-    async create({username,phoneNumber}){
+    async create({username,phoneNumber,bio}){
         const user = await prisma.user.create({
             data:
             {
                 name: username,
-                phoneNumber
+                phoneNumber,
+                bio
             }
         })
         return user
@@ -14,7 +15,7 @@ class UserRepo{
     async getUserById({userId}){
         const user = await prisma.user.findUnique({
             where:{
-                userId
+                userId: userId
             }
         })
         return user

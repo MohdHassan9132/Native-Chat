@@ -1,4 +1,4 @@
-export default function OtpErrorBanner() {
+export default function OtpErrorBanner({ message = "That code doesn't look right. Please try again." }) {
   return (
     <div
       role="alert"
@@ -10,7 +10,7 @@ export default function OtpErrorBanner() {
         <path d="M12 8v5m0 3h.01" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span className="text-xs font-bold text-brand-charcoal">
-        That code doesn&apos;t look right. Please try again.
+        {message}
       </span>
     </div>
   );

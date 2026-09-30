@@ -8,6 +8,9 @@ import ProfileAvatar, { DEFAULT_AVATAR_SRC } from "./ProfileAvatar";
 import ProfileNameCard from "./ProfileNameCard";
 import ProfileBioCard from "./ProfileBioCard";
 import ProfileFooter from "./ProfileFooter";
+import OtpErrorBanner from "@/components/verification/OtpErrorBanner";
+import { registerUser } from "@/lib/api/users";
+import { PENDING_PHONE_KEY } from "@/lib/api/session";
 
 function HelpIcon() {
   return (
@@ -28,6 +31,8 @@ export default function InitialDetailsPage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [avatarSrc, setAvatarSrc] = useState(DEFAULT_AVATAR_SRC);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const nameInputRef = useRef(null);
   const bioTextareaRef = useRef(null);
@@ -47,11 +52,32 @@ export default function InitialDetailsPage() {
     bioTextareaRef.current?.focus();
   }
 
-  // UI-only: no profile is actually created/persisted — just completes the
-  // onboarding flow by moving to the main Chats screen.
-  function handleContinue() {
-    if (!canContinue) return;
-    router.push("/home");
+  // Registers the user (POST /api/users/register); the backend sets the auth
+  // cookies. Validation/conflict errors come back as user-facing messages.
+  async function handleContinue() {
+    if (!canContinue || submitting) return;
+
+    let phoneNumber = null;
+    try {
+      phoneNumber = sessionStorage.getItem(PENDING_PHONE_KEY);
+    } catch {}
+    if (!phoneNumber) {
+      setError("Please verify your phone number first.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError("");
+    try {
+      await registerUser({ name: name.trim(), phoneNumber, bio: bio.trim() });
+      try {
+        sessionStorage.removeItem(PENDING_PHONE_KEY);
+      } catch {}
+      router.push("/home");
+    } catch (err) {
+      setError(err.message);
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -74,7 +100,13 @@ export default function InitialDetailsPage() {
             />
           </div>
 
-          <ProfileFooter canContinue={canContinue} onContinue={handleContinue} />
+          {error && (
+            <div className="mt-4">
+              <OtpErrorBanner message={error} />
+            </div>
+          )}
+
+          <ProfileFooter canContinue={canContinue && !submitting} onContinue={handleContinue} />
         </div>
       </main>
     </>

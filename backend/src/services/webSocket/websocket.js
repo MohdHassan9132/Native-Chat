@@ -1,4 +1,5 @@
 import { Server } from "socket.io"
+import { verifySocketConnection } from "../../middlewares/auth.middleware.js"
 
 class WebSocket {
 
@@ -12,19 +13,22 @@ class WebSocket {
     }
 
     initListeners(connectionHandler) {
+        this.server.use((socket,next)=>{
+            verifySocketConnection(socket,next)
+        })
 
         this.server.on(
             "connection",
-            connectionHandler
+            connectionHandler,
         )
     }
 
-    emitToClients(event, message) {
+    emitToClients(event, payload) {
 
         console.log(
             "emitting this message to the clients",
             event,
-            message
+            payload
         )
 
         this.server.emit(
@@ -33,11 +37,11 @@ class WebSocket {
         )
     }
 
-    emitToSocketId(socketId, message) {
+    emitToSocketId(socketId,event,payload) {
 
         this.server
             .to(socketId)
-            .emit("new", message)
+            .emit(event, payload)
     }
 }
 

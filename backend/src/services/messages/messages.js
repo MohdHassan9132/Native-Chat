@@ -1,24 +1,14 @@
 class MessageService {
 
-    constructor(userService, redis, webSocket, serverId) {
-        this.userService = userService
+    constructor(redis, webSocket, serverId) {
         this.redis = redis
         this.webSocket = webSocket
         this.serverId = serverId
     }
 
     async sendMessage(message) {
-        const user = this.userService.findUser(message.recieverName)
-        // User exists on this server
-        if (user) {
-            this.webSocket.emitToSocketId(
-                user.socketId,
-                message
-            )
-            return
-        }
-        // User isn't on this server.
-        // Try sending through Redis.
+        // TODO: look up the receiver's socket/server in Redis; deliver directly
+        // if they are on this server, otherwise publish.
         await this.redis.publish(
             "messages",
             JSON.stringify({
@@ -33,18 +23,7 @@ class MessageService {
             "message received from redis",
             data
         )
-        const user = this.userService.findUser(
-            data.message.recieverName
-        )
-
-        if(!user){
-            return
-        }
-
-        this.webSocket.emitToSocketId(
-            user.socketId,
-            data.message
-        )
+        // TODO: look up the receiver's socketId in Redis and emit "new" to it.
     }
 }
 

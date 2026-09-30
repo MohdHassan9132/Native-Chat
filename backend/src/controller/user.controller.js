@@ -3,7 +3,7 @@ import { ApiResponse } from "../utils/api.response.js";
 import {userService} from "../services/user/user.service.js"
 
 const registerUser = asyncHandler(async(req,res)=>{
-    const {name,phoneNumber} = req.body
+    const {name,phoneNumber,bio} = req.body
     const {
         user,
         accessToken,
@@ -11,6 +11,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     } = await userService.registerUser({
         name,
         phoneNumber,
+        bio
     })
     res.status(201)
     .cookie('accessToken',accessToken)

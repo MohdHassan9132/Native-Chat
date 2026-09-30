@@ -5,6 +5,7 @@ import ChatFilters from "./ChatFilters";
 import ChatList from "./ChatList";
 import FloatingComposeButton from "./FloatingComposeButton";
 import BottomNavigation from "./BottomNavigation";
+import HomeSocket from "./HomeSocket";
 
 export default function HomePage() {
   return (
@@ -22,6 +23,7 @@ export default function HomePage() {
           <ChatList />
         </div>
 
+        <HomeSocket />
         <FloatingComposeButton />
         <BottomNavigation />
       </main>

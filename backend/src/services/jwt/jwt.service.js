@@ -9,7 +9,7 @@ if (!process.env.REFRESH_TOKEN_SECRET || !process.env.ACCESS_TOKEN_SECRET) {
 }
 
 class Jwt {
-    async verifyJWT({ token }) {
+    verifyJWT({ token }) {
         const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
         return payload
     }

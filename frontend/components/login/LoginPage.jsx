@@ -8,6 +8,7 @@ import AuthActions from "./AuthActions";
 import ConnectIllustrationCard from "./ConnectIllustrationCard";
 import LegalFooter from "./LegalFooter";
 import OtpVerificationModal from "@/components/verification/OtpVerificationModal";
+import { PENDING_PHONE_KEY } from "@/lib/api/session";
 
 const PHONE_LENGTH = 10;
 
@@ -17,11 +18,14 @@ export default function LoginPage({ countries, defaultCountry }) {
   const [otpOpen, setOtpOpen] = useState(false);
   const canSubmit = phone.length === PHONE_LENGTH;
 
-  // UI-only: opens the OTP bottom sheet with the current country/phone.
-  // No API call — see OtpVerificationModal for the mock verify flow.
+  // Opens the OTP bottom sheet (OTP itself is still mocked — no backend
+  // endpoint). The phone is kept for the profile step, which registers the user.
   function handleSubmit(e) {
     e.preventDefault();
     if (!canSubmit) return;
+    try {
+      sessionStorage.setItem(PENDING_PHONE_KEY, phone);
+    } catch {}
     setOtpOpen(true);
   }
 

@@ -1,6 +1,10 @@
+"use client";
+
+import { useIsLoggedIn } from "@/lib/auth";
 import PillButton from "@/components/shared/PillButton";
 
 export default function FinalCTA() {
+  const loggedIn = useIsLoggedIn();
   return (
     <section className="py-20 lg:py-24 bg-brand-cyanLight/40 border-b-2 border-brand-charcoal relative">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,7 +29,7 @@ export default function FinalCTA() {
 
           {/* No Sign Up button, per design reference — Log In is the only auth CTA */}
           <div className="mt-8 flex justify-center">
-            <PillButton href="/login" variant="primary" className="text-base sm:text-lg px-9 py-4">
+            <PillButton href={loggedIn ? "/home" : "/login"} variant="primary" className="text-base sm:text-lg px-9 py-4">
               <span>Open nativeChat</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />
