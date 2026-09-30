@@ -14,6 +14,16 @@ class ChatRepo {
         })
         return chat
     }
+    async getChats({
+        userId
+    }){
+        const chats = await prisma.chat.findMany({
+            where:{
+                user1Id: userId,
+            }
+        })
+        return chats;
+    }
 }
 
 export const chatRepo = new ChatRepo()

@@ -24,6 +24,14 @@ class ChatService{
             throw new ApiError(500,"Internal Server Error")
         }
     }
+    async getChats({
+        userId
+    }){
+        const chats = await chatRepo.getChats({
+            userId
+        })
+        return chats
+    }
 }
 
 export const chatService = new ChatService()

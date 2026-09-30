@@ -11,4 +11,12 @@ const createChat = asyncHandler(async(req,res)=>{
     return res.status(201).json(new ApiResponse(201,"Chat created successfully",newChat))
 })
 
-export {createChat}
+const getChats = asyncHandler(async(req,res)=>{
+    const chats = await chatService.getChats({
+        userId: req.user.userId
+    })
+    console.log(chats)
+    return res.status(200).json(new ApiResponse(200,"Chats retrieved successfully",chats))
+})
+
+export {createChat,getChats}

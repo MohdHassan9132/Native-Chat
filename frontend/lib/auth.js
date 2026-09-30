@@ -24,3 +24,14 @@ const subscribe = () => () => {};
 export function useIsLoggedIn() {
   return useSyncExternalStore(subscribe, hasValidSession, () => false);
 }
+
+// userId claim from the accessToken cookie (unverified; display/matching only).
+export function getSessionUserId() {
+  const token = readCookie("accessToken");
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))).userId ?? null;
+  } catch {
+    return null;
+  }
+}
