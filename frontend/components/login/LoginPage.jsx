@@ -8,7 +8,8 @@ import AuthActions from "./AuthActions";
 import ConnectIllustrationCard from "./ConnectIllustrationCard";
 import LegalFooter from "./LegalFooter";
 import OtpVerificationModal from "@/components/verification/OtpVerificationModal";
-import { PENDING_PHONE_KEY } from "@/lib/api/session";
+import OtpErrorBanner from "@/components/verification/OtpErrorBanner";
+import { startRegistration } from "@/lib/api/auth";
 
 const PHONE_LENGTH = 10;
 
@@ -16,17 +17,33 @@ export default function LoginPage({ countries, defaultCountry }) {
   const [country, setCountry] = useState(defaultCountry);
   const [phone, setPhone] = useState("");
   const [otpOpen, setOtpOpen] = useState(false);
-  const canSubmit = phone.length === PHONE_LENGTH;
+  const [challengeId, setChallengeId] = useState(null);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+  const canSubmit = phone.length === PHONE_LENGTH && !sending;
+  const fullPhone = `${country.dialCode}${phone}`;
 
-  // Opens the OTP bottom sheet (OTP itself is still mocked — no backend
-  // endpoint). The phone is kept for the profile step, which registers the user.
-  function handleSubmit(e) {
+  // Requests an OTP (POST /api/auth/register); the challengeId is then verified
+  // inside the OTP sheet.
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!canSubmit) return;
+    setSending(true);
+    setError("");
     try {
-      sessionStorage.setItem(PENDING_PHONE_KEY, phone);
-    } catch {}
-    setOtpOpen(true);
+      setChallengeId(await startRegistration({ phoneNumber: fullPhone }));
+      setOtpOpen(true);
+    } catch (err) {
+      setError(
+        err.status === 409
+          ? "This number is already registered."
+          : err.status === 400
+            ? "Enter a valid phone number."
+            : err.message
+      );
+    } finally {
+      setSending(false);
+    }
   }
 
   return (
@@ -64,6 +81,11 @@ export default function LoginPage({ countries, defaultCountry }) {
               value={phone}
               onChange={setPhone}
             />
+            {error && (
+              <div className="mt-4">
+                <OtpErrorBanner message={error} />
+              </div>
+            )}
             <AuthActions canSubmit={canSubmit} />
           </form>
 
@@ -77,6 +99,9 @@ export default function LoginPage({ countries, defaultCountry }) {
         onClose={() => setOtpOpen(false)}
         country={country}
         phone={phone}
+        challengeId={challengeId}
+        onChallengeChange={setChallengeId}
+        fullPhone={fullPhone}
       />
     </>
   );

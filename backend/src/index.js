@@ -7,6 +7,7 @@ import WebSocket from "./services/webSocket/websocket.js";
 import MessageService from "./services/messages/messages.js";
 
 import { eventRouter } from "./router/event.router.js";
+import OTPService from "./services/OTP/otp.service.js";
 
 const PORT = process.env.PORT || 8000;
 const SERVER_ID = process.env.SERVER_ID || `server-${PORT}`;
@@ -15,6 +16,9 @@ const httpServer = http.createServer(app);
 
 const webSocket = new WebSocket(httpServer);
 const redis = new Redis();
+
+const OtpService = new OTPService(redis)
+app.set('otpService',OtpService)
 
 const messagingService = new MessageService(
     redis,

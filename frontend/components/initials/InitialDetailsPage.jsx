@@ -9,8 +9,7 @@ import ProfileNameCard from "./ProfileNameCard";
 import ProfileBioCard from "./ProfileBioCard";
 import ProfileFooter from "./ProfileFooter";
 import OtpErrorBanner from "@/components/verification/OtpErrorBanner";
-import { registerUser } from "@/lib/api/users";
-import { PENDING_PHONE_KEY } from "@/lib/api/session";
+import { completeProfile } from "@/lib/api/users";
 
 function HelpIcon() {
   return (
@@ -52,27 +51,14 @@ export default function InitialDetailsPage() {
     bioTextareaRef.current?.focus();
   }
 
-  // Registers the user (POST /api/users/register); the backend sets the auth
-  // cookies. Validation/conflict errors come back as user-facing messages.
+  // Saves the profile (PATCH /api/users/complete-profile); the auth cookie was
+  // set when the OTP was verified.
   async function handleContinue() {
     if (!canContinue || submitting) return;
-
-    let phoneNumber = null;
-    try {
-      phoneNumber = sessionStorage.getItem(PENDING_PHONE_KEY);
-    } catch {}
-    if (!phoneNumber) {
-      setError("Please verify your phone number first.");
-      return;
-    }
-
     setSubmitting(true);
     setError("");
     try {
-      await registerUser({ name: name.trim(), phoneNumber, bio: bio.trim() });
-      try {
-        sessionStorage.removeItem(PENDING_PHONE_KEY);
-      } catch {}
+      await completeProfile({ name: name.trim(), bio: bio.trim() });
       router.push("/home");
     } catch (err) {
       setError(err.message);

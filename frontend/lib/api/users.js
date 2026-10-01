@@ -1,9 +1,9 @@
 import { apiRequest } from "./client";
 
-// POST /api/users/register — sets the auth cookies and returns the user.
-export function registerUser({ name, phoneNumber, bio }) {
-  return apiRequest("/api/users/register", {
-    method: "POST",
-    body: { name, phoneNumber, bio },
+// PATCH /api/users/complete-profile — requires the auth cookie.
+export function completeProfile({ name, bio }) {
+  return apiRequest("/api/users/complete-profile", {
+    method: "PATCH",
+    body: { name, bio },
   });
 }

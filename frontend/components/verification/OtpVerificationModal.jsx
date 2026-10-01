@@ -8,22 +8,21 @@ import OtpInput from "./OtpInput";
 import OtpErrorBanner from "./OtpErrorBanner";
 import OtpResend from "./OtpResend";
 import OtpSuccess from "./OtpSuccess";
+import { startRegistration, verifyRegistration } from "@/lib/api/auth";
 
 const OTP_LENGTH = 6;
 const RESEND_SECONDS = 42;
-// Mock-only: there is no backend, so this fixed code stands in for "correct".
-// Any other complete 6-digit entry lands on the Incorrect state.
-const MOCK_VALID_OTP = "123456";
-
 function focusPhoneInput() {
   document.getElementById("phoneInput")?.focus();
 }
 
-export default function OtpVerificationModal({ open, onClose, country, phone }) {
+export default function OtpVerificationModal({ open, onClose, country, phone, challengeId, onChallengeChange, fullPhone }) {
   const [digits, setDigits] = useState(() => Array(OTP_LENGTH).fill(""));
   const [verifyState, setVerifyState] = useState("entering"); // entering | incorrect | success
   const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
   const [shakeKey, setShakeKey] = useState(0);
+  const [verifying, setVerifying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const sheetRef = useRef(null);
   const closeButtonRef = useRef(null);
@@ -103,18 +102,37 @@ export default function OtpVerificationModal({ open, onClose, country, phone }) 
     setDigits(next);
   }
 
-  function handleVerifySubmit(e) {
+  function showError(message) {
+    setErrorMessage(message);
+    setVerifyState("incorrect");
+    setShakeKey((k) => k + 1);
+  }
+
+  // POST /api/auth/register/verify — creates the user and sets the auth cookies.
+  async function handleVerifySubmit(e) {
     e.preventDefault();
-    if (!complete) return;
-    if (digits.join("") === MOCK_VALID_OTP) {
+    if (!complete || verifying) return;
+    setVerifying(true);
+    try {
+      await verifyRegistration({ challengeId, userOTP: digits.join("") });
       setVerifyState("success");
-    } else {
-      setVerifyState("incorrect");
-      setShakeKey((k) => k + 1);
+    } catch (err) {
+      if (err.status === 401) showError("That code doesn't look right. Please try again.");
+      else if (err.status === 404) showError("This code has expired. Request a new one.");
+      else showError(err.message);
+    } finally {
+      setVerifying(false);
     }
   }
 
-  function handleResend() {
+  // Re-requests an OTP via POST /api/auth/register (new challengeId).
+  async function handleResend() {
+    try {
+      onChallengeChange(await startRegistration({ phoneNumber: fullPhone }));
+    } catch (err) {
+      showError(err.message);
+      return;
+    }
     setDigits(Array(OTP_LENGTH).fill(""));
     setVerifyState("entering");
     setSecondsLeft(RESEND_SECONDS);
@@ -157,9 +175,9 @@ export default function OtpVerificationModal({ open, onClose, country, phone }) 
               shakeKey={shakeKey}
             />
 
-            {verifyState === "incorrect" && <OtpErrorBanner />}
+            {verifyState === "incorrect" && <OtpErrorBanner message={errorMessage} />}
 
-            <PillButton type="submit" variant="primary" disabled={!complete} className="w-full justify-center py-3.5 text-sm">
+            <PillButton type="submit" variant="primary" disabled={!complete || verifying} className="w-full justify-center py-3.5 text-sm">
               <span>Verify &amp; Continue</span>
               <svg className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" />

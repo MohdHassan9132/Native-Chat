@@ -4,40 +4,11 @@ import {ApiError} from '../../utils/api.error.js'
 import {jsonwebtokens} from '../jwt/jwt.service.js'
 
 class UserService {
-
-    async registerUser({
-        name,phoneNumber,bio
-    }){
-        const validatedName = validateName(name);
-        const validatedPhoneNumber = validatePhoneNumber(phoneNumber)
+    async completeProfile(userId,name,bio){
         const validatedBio = validateBio(bio)
-        let user;
-        try {
-            user = await userRepo.create({
-                username: name,
-                phoneNumber: validatedPhoneNumber,
-                bio: validatedBio
-            })
-        } catch (error) {
-            throw new ApiError(409,'user already exists')
-        }
-        const {accessToken,refreshToken} = jsonwebtokens.generateTokens({
-            user
-        })
-        const hashedToken = jsonwebtokens.hashToken(refreshToken)
-        const isSaved = await userRepo.saveHashedTokenToDB({
-            userId: user.userId,
-            hashedToken,
-        })
-        if(isSaved){
-            return {
-                user,
-                accessToken,
-                refreshToken,
-            }
-        }
-        
-
+        const validatedName = validateName(name)
+        const updatedUser = await userRepo.updateUser(userId,validatedBio,validatedName)
+        return updatedUser;
     }
 }
 

@@ -17,7 +17,10 @@ const validateName = (name) => {
   return result.data;
 };
 
-const phoneNumbeSchema = z.string().length(10,"Phone Number should of 10 Numbers")
+const phoneNumbeSchema = z.string().regex(
+  /^\+?[1-9]\d{1,14}$/, 
+  { message: "Invalid phone number format. Use E.164 format (e.g., +919876543210)" }
+);
 
 const validatePhoneNumber = (phoneNumber)=>{
   const result = phoneNumbeSchema.safeParse(phoneNumber)

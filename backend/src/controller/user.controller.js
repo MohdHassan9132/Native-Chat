@@ -2,21 +2,10 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/api.response.js";
 import {userService} from "../services/user/user.service.js"
 
-const registerUser = asyncHandler(async(req,res)=>{
-    const {name,phoneNumber,bio} = req.body
-    const {
-        user,
-        accessToken,
-        refreshToken,
-    } = await userService.registerUser({
-        name,
-        phoneNumber,
-        bio
-    })
-    res.status(201)
-    .cookie('accessToken',accessToken)
-    .cookie('refreshToken',refreshToken)
-    .json(new ApiResponse(201,'user registered successfully',user))
+const completeProfile = asyncHandler(async(req,res)=>{
+    const {bio,name} = req.body
+    const completeUser = await userService.completeProfile(req.user.userId,name,bio)
+    return res.status(200).json(new ApiResponse(200,"user profile completed",completeUser))
 })
 
-export{registerUser}
+export{completeProfile}

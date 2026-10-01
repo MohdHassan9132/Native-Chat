@@ -4,11 +4,14 @@ class Redis {
 
     constructor() {
         this.subscriber = createClient({
-            url: "redis://localhost:6379"
+            url: process.env.REDIS_URL
         })
 
         this.publisher = createClient({
-            url: "redis://localhost:6379"
+            url: process.env.REDIS_URL
+        })
+        this.redisDB = createClient({
+            url: process.env.REDIS_URL
         })
     }
 
@@ -18,6 +21,7 @@ class Redis {
         console.log("subscriber connected")
         await this.publisher.connect()
         console.log("publisher connected")
+        await this.redisDB.connect()
     }
 
     async publish(channel, message) {
@@ -34,6 +38,28 @@ class Redis {
             channel,
             callback
         )
+    }
+    async writeToRedisWithTTL(key,value){
+        //for otp
+        const redisObject = await this.redisDB.json.set(key,'$',value)
+        await this.redisDB.expire(key,300)
+        return redisObject||null
+    }
+    async writeToRedis(key,value){
+        //for user websocket no TTL remove when disconnects
+        const redisObject = await this.redisDB.json.set(key,'$',value)
+        return redisObject
+    }
+    async readFromRedis(key){
+        const redisObject = await this.redisDB.json.get(key)
+        return redisObject || null
+    }
+    async updateRedis(){
+        
+    }
+    async deleteFromRedis(key){
+        const isDeleted = await this.redisDB.json.del(key)
+        return isDeleted;
     }
 }
 

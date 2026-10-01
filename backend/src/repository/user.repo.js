@@ -1,13 +1,11 @@
 import {prisma} from '../db/index.js'
 
 class UserRepo{
-    async create({username,phoneNumber,bio}){
+    async create({phoneNumber}){
         const user = await prisma.user.create({
             data:
             {
-                name: username,
                 phoneNumber,
-                bio
             }
         })
         return user
@@ -40,6 +38,18 @@ class UserRepo{
         if(user){
             return true;
         }
+    }
+    async updateUser(userId,bio,name){
+        const updatedUser = await prisma.user.update({
+            where:{
+                userId,
+            },
+            data:{
+                bio,
+                name
+            }
+        })
+        return updatedUser
     }
 }
 

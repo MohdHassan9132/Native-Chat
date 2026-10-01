@@ -1,6 +1,6 @@
 model User {
   userId           String    @id @default(uuid())
-  name             String
+  name             String?
   phoneNumber      String? @unique
   profilePicture   Json?
   bio              String?

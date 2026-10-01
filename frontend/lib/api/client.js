@@ -9,10 +9,12 @@ export class ApiRequestError extends Error {
 }
 
 const FALLBACK_MESSAGES = {
+  400: "Please check the details you entered and try again.",
   401: "Your session is not valid. Please log in again.",
   403: "You are not allowed to do that.",
   404: "We couldn't find what you were looking for.",
   409: "That already exists.",
+  503: "The service is temporarily unavailable. Please try again shortly.",
   498: "Your session has expired. Please log in again.",
 };
 
