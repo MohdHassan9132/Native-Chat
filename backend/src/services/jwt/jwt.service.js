@@ -1,10 +1,9 @@
 import 'dotenv/config'
 import { ApiError } from "../../utils/api.error.js";
 import jwt from 'jsonwebtoken'
-import bcrypt from 'bcrypt'
+import crypto from 'node:crypto'
 
 if (!process.env.REFRESH_TOKEN_SECRET || !process.env.ACCESS_TOKEN_SECRET) {
-    console.log(`JWT Secrets are undefined`)
     throw new ApiError(500, "Internal Server Error")
 }
 
@@ -35,13 +34,12 @@ class Jwt {
         }
     }
     hashToken(token){
-        const hashedToken = bcrypt.hashSync(
-            token,Number(process.env.SALT_ROUNDS)
-        )
+        const hashedToken = crypto.createHmac("sha256",process.env.HMAC_KEY).update(token).digest("hex")
         return hashedToken
     }
     verifyHashToken(plainToken,hashedToken){
-        const isValid = bcrypt.compareSync(plainToken,hashedToken)
+        const plainTokenToHmac = crypto.createHmac("sha256",process.env.HMAC_KEY).update(plainToken).digest("hex")
+        const isValid =  plainTokenToHmac === hashedToken
         return isValid
     }
 }

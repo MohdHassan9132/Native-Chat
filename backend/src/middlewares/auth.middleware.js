@@ -12,7 +12,6 @@ const verifySocketConnection = (socket, next) => {
 
         const user = jsonwebtokens.verifyJWT({ token });
         socket.handshake.user = user;
-        console.log(token,"is verified and returned the user object as",socket.handshake.user)
         return next();
     } catch (error) {
 

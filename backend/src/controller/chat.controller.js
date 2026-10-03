@@ -15,7 +15,6 @@ const getChats = asyncHandler(async(req,res)=>{
     const chats = await chatService.getChats({
         userId: req.user.userId
     })
-    console.log(chats)
     return res.status(200).json(new ApiResponse(200,"Chats retrieved successfully",chats))
 })
 

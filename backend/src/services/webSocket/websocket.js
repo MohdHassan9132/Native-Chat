@@ -25,12 +25,6 @@ class WebSocket {
 
     emitToClients(event, payload) {
 
-        console.log(
-            "emitting this message to the clients",
-            event,
-            payload
-        )
-
         this.server.emit(
             event,
             { message }

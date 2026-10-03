@@ -18,6 +18,9 @@ class SMSService {
                 }),
             }
         )
+        if(!res.ok){
+            return false
+        }
 
         console.log(await res.json())
         return true
