@@ -54,9 +54,14 @@ class Redis {
         const redisObject = await this.redisDB.json.get(key)
         return redisObject || null
     }
-    async updateRedis(){
-        
+    async updateNumRedis(key, field, count) {
+        await this.redisDB.json.numIncrBy(key , '$.' + field, count);
     }
+
+    async updateRedis(key, field,newValue) {
+        await this.redisDB.json.set(key, '$.' + field, newValue);
+    }
+
     async deleteFromRedis(key){
         const isDeleted = await this.redisDB.json.del(key)
         return isDeleted;
