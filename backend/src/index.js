@@ -27,6 +27,7 @@ const messagingService = new MessageService(
 );
 
 await redis.initRedis();
+await redis.initIndex();
 
 await redis.redisSubscriber("messages", (data) => {
     const message = JSON.parse(data);

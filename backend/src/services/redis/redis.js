@@ -1,4 +1,4 @@
-import { createClient } from "redis"
+import { createClient, SCHEMA_FIELD_TYPE } from "redis"
 
 class Redis {
 
@@ -39,32 +39,62 @@ class Redis {
             callback
         )
     }
-    async writeToRedisWithTTL(key,value){
+    async initIndex() {
+        try {
+            await this.redisDB.ft.create(
+                'idx:number',
+                {
+                    '$.phoneNumber': {
+                        type: SCHEMA_FIELD_TYPE.TAG,
+                        AS: 'phoneNumber'
+                    }
+                },
+                {
+                    ON: 'JSON'
+                }
+            );
+            console.log('Redis index created')
+        } catch (error) {
+            if (error.message.includes('SEARCH_INDEX_EXISTS')) {
+                console.log('Redis index already exists')
+            } else {
+                throw error
+            }
+        }
+    }
+    async writeToRedisWithTTL(key, value,TTL = 300) {
         //for otp
         const redisObject = await this.redisDB.json.set(key,'$',value)
-        await this.redisDB.expire(key,300)
-        return redisObject||null
+        await this.redisDB.expire(key, TTL)
+        return redisObject || null
     }
-    async writeToRedis(key,value){
+    async writeToRedis(key, value) {
         //for user websocket no TTL remove when disconnects
-        const redisObject = await this.redisDB.json.set(key,'$',value)
+        const redisObject = await this.redisDB.json.set(key, '$', value,)
         return redisObject
     }
-    async readFromRedis(key){
+    async readFromRedis(key) {
         const redisObject = await this.redisDB.json.get(key)
         return redisObject || null
     }
     async updateNumRedis(key, field, count) {
-        await this.redisDB.json.numIncrBy(key , '$.' + field, count);
+        await this.redisDB.json.numIncrBy(key, '$.' + field, count);
     }
 
-    async updateRedis(key, field,newValue) {
+    async updateRedis(key, field, newValue) {
         await this.redisDB.json.set(key, '$.' + field, newValue);
     }
 
-    async deleteFromRedis(key){
+    async deleteFromRedis(key) {
         const isDeleted = await this.redisDB.json.del(key)
         return isDeleted;
+    }
+    async readByPhoneNumber(phoneNumber) {
+        const redisObject = await this.redisDB.ft.search(
+            'idx:number',
+            `@phoneNumber:{${phoneNumber}}`
+        )
+        return redisObject;
     }
 }
 

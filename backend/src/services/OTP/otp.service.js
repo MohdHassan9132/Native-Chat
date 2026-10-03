@@ -14,6 +14,18 @@ class OTPService {
         return hashedOTP;
     }
     async generateOTP(key, phoneNumber) {
+        console.log('Inside generateOTPc')
+        const isBlocked = await this.redisDB.readFromRedis(phoneNumber)
+        console.log(isBlocked)
+        if(isBlocked){
+            throw new ApiError(401,`Try again after ${isBlocked}`)
+        }
+        const challengeExists = await this.redisDB.readByPhoneNumber(phoneNumber);
+        console
+        .log(challengeExists)
+        if(challengeExists.total > 0){
+            throw new ApiError(409,"Challenge already exists")
+        }
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         console.log(otp);
         const HmacOTP = this.generateHmacOTP(otp);
@@ -33,6 +45,12 @@ class OTPService {
         const redisObject = await this.redisDB.readFromRedis(key);
         if (!redisObject) {
             throw new ApiError(404, "challenge Not Found");
+        }
+        if(redisObject.verificationAttempts < 1){
+            const blockUser = await
+             this.redisDB.writeToRedisWithTTL(redisObject.phoneNumber,"Blocked",86400)
+             this.redisDB.deleteFromRedis(key)
+            throw new ApiError(401,"OTP attemps exhausted")
         }
         const isValid = this.generateHmacOTP(userOTP) === redisObject.HmacOTP;
         if (!isValid) {
