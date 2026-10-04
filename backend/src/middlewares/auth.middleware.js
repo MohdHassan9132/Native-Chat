@@ -1,7 +1,8 @@
 import { jsonwebtokens } from "../services/jwt/jwt.service.js";
 import { ApiError } from "../utils/api.error.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
-const verifySocketConnection = (socket, next) => {
+import {userRepo} from '../repository/user.repo.js'
+const verifySocketConnection = async (socket, next) => {
     const token = socket.handshake.auth.token;
 
     if (!token) {
@@ -11,6 +12,10 @@ const verifySocketConnection = (socket, next) => {
     try {
 
         const user = jsonwebtokens.verifyJWT({ token });
+        const dbUser = await userRepo.getUserById(user.payload.userId)
+        if(!dbUser){
+            throw new ApiError(404,"User no longer exists")
+        }
         socket.handshake.user = user;
         return next();
     } catch (error) {

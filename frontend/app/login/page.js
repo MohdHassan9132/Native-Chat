@@ -13,6 +13,7 @@ export const metadata = {
 export default function Login() {
   const countries = getCountries();
   const defaultCountry = countries.find((c) => c.cca2 === DEFAULT_COUNTRY_CCA2) ?? countries[0];
+    console.log(defaultCountry.flag)
 
   return <LoginPage countries={countries} defaultCountry={defaultCountry} />;
 }

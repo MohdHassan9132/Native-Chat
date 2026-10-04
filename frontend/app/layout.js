@@ -1,4 +1,5 @@
 import { Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import "flag-icons/css/flag-icons.min.css";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({

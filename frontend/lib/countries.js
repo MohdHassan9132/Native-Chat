@@ -14,7 +14,6 @@ export function getCountries() {
       return {
         cca2: c.cca2,
         name: c.name.common,
-        flag: c.flag,
         dialCode: c.idd.root + suffix,
       };
     })
