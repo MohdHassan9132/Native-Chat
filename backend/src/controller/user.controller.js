@@ -8,4 +8,10 @@ const completeProfile = asyncHandler(async(req,res)=>{
     return res.status(200).json(new ApiResponse(200,"user profile completed",completeUser))
 })
 
-export{completeProfile}
+const getUserByPhonenumber = asyncHandler(async(req,res)=>{
+    const {phoneNumber} = req.body
+    const user = await userService.getUserByPhonenumber(phoneNumber)
+    return res.status(200).json(new ApiResponse(200,"User fetched successfully",{user: user}))
+})
+
+export{completeProfile,getUserByPhonenumber}

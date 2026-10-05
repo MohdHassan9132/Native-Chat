@@ -5,12 +5,19 @@ class ChatRepo {
         user2Id,
         chatType,
     }) {
-        const chat = await prisma.chat.create({
-            data:{
-                chatType,
+        const chat = await prisma.chat.upsert({
+            where:{
+                user1Id_user2Id:{
+                    user1Id,
+                    user2Id
+                }
+            },
+            create:{
                 user1Id,
                 user2Id,
-            }
+                chatType
+            },
+            update:{}
         })
         return chat
     }
@@ -19,7 +26,14 @@ class ChatRepo {
     }){
         const chats = await prisma.chat.findMany({
             where:{
-                user1Id: userId,
+                OR:[
+                    {user1Id: userId},
+                    {user2Id: userId}
+                ]
+            },
+            include:{
+                user1: true,
+                user2: true
             }
         })
         return chats;

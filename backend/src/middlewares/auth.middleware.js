@@ -12,7 +12,9 @@ const verifySocketConnection = async (socket, next) => {
     try {
 
         const user = jsonwebtokens.verifyJWT({ token });
-        const dbUser = await userRepo.getUserById(user.payload.userId)
+        const dbUser = await userRepo.getUserById({
+            userId: user.userId
+        })
         if(!dbUser){
             throw new ApiError(404,"User no longer exists")
         }

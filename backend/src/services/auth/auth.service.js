@@ -5,18 +5,18 @@ import { validatePhoneNumber } from '../../validators/user.validator.js'
 import {smsService} from '../SMS/sms.service.js'
 class AuthService {
     async register(phoneNumber,otpService) {
-        const validatedPhoneNumber = validatePhoneNumber(phoneNumber)
+        const validatedPhonenumber = validatePhoneNumber(phoneNumber)
         const isUser = await userRepo.getUserByPhoneNumber({
-            phoneNumber: String(validatedPhoneNumber) 
+            phoneNumber: String(validatedPhonenumber) 
         })
         if(isUser){
             throw new ApiError(409,"User already exists")
         }
         const challengeId = crypto.randomUUID()
-        const otp = await otpService.generateOTP(challengeId,validatedPhoneNumber);
+        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber);
         const sendToUser = await smsService.sendSMS({
             otp,
-            phoneNumber: validatedPhoneNumber
+            phoneNumber: validatedPhonenumber
         })
         if(!sendToUser){
             throw new ApiError(503,"OTP service is unavailable")

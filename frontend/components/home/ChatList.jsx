@@ -10,13 +10,19 @@ function ChatAvatar({ className }) {
   return <SelfAvatarIcon className={`${className} text-brand-charcoal`} />;
 }
 
-// The API only returns ids and timestamps (no names, avatars or messages),
-// so the card shows what is real and leaves the rest neutral.
+
 function toConversation(chat, userId) {
-  const otherId = chat.user1Id === userId ? chat.user2Id : chat.user1Id;
+  const isSelf = chat.user1.userId === userId && chat.user2.userId === userId;
+  let name;
+  if(isSelf){
+    name = `${chat.user1.name} (You)`
+  }else{
+    const otherUser = chat.user1.userId === userId ? chat.user2 : chat.user1
+    name = otherUser.name
+  }
   return {
     id: chat.chatId,
-    name: otherId === userId ? "You" : `User ${otherId.slice(0, 8)}`,
+    name,
     preview: "No messages yet",
     time: new Date(chat.createdAt).toLocaleDateString([], { day: "numeric", month: "short" }),
     bg: "#FFF3DF",

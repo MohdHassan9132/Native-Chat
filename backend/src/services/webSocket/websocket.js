@@ -19,7 +19,7 @@ class WebSocket {
 
         this.server.on(
             "connection",
-            connectionHandler,
+        connectionHandler
         )
     }
 
@@ -27,7 +27,7 @@ class WebSocket {
 
         this.server.emit(
             event,
-            { message }
+            payload
         )
     }
 

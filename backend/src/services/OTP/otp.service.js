@@ -52,7 +52,6 @@ class OTPService {
         }
        
         await this.redisDB.deleteFromRedis(key);
-        console.log(redisObject);
         const dbUser = await userRepo.create({
             phoneNumber: redisObject.phoneNumber,
         });
