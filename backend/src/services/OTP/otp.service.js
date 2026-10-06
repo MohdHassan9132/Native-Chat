@@ -52,18 +52,7 @@ class OTPService {
         }
        
         await this.redisDB.deleteFromRedis(key);
-        const dbUser = await userRepo.create({
-            phoneNumber: redisObject.phoneNumber,
-        });
-        const { accessToken, refreshToken } = jsonwebtokens.generateTokens({
-            user: dbUser,
-        });
-        const hashedRefreshToken = jsonwebtokens.hashToken(refreshToken);
-        await userRepo.saveHashedTokenToDB({
-            userId: dbUser.userId,
-            hashedToken: hashedRefreshToken,
-        });
-        return { accessToken, refreshToken, dbUser };
+        return redisObject
     }
 }
 
