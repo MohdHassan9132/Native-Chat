@@ -1,59 +1,78 @@
 import crypto from "node:crypto";
-import { jsonwebtokens } from "../jwt/jwt.service.js";
 import { ApiError } from "../../utils/api.error.js";
-import { userRepo } from "../../repository/user.repo.js";
+import { cryptoService } from "../crypto/crypto.service.js";
 class OTPService {
-    constructor(redisDB) {
-        this.redisDB = redisDB;
+  constructor(redisDB) {
+    this.redisDB = redisDB;
+  }
+
+  async generateOTP(key, phoneNumber, purpose) {
+    const phoneHash = cryptoService.generateHmac(phoneNumber);
+    console.log(`PhoneHash is ${phoneHash}`);
+    const isBlocked = await this.redisDB.readFromRedis(
+      `otp:block:phone:${phoneHash}`,
+    );
+    if (isBlocked) {
+      throw new ApiError(
+        429,
+        `OTP generation blocked for ${isBlocked.BlockedUntil}`,
+      );
     }
-    generateHmacOTP(otp) {
-        const hashedOTP = crypto
-            .createHmac("sha256", process.env.HMAC_KEY)
-            .update(otp)
-            .digest("hex");
-        return hashedOTP;
+    const challengeExists = await this.redisDB.readByPhoneHash(phoneHash);
+    console.log("Challenges:", challengeExists);
+    if (challengeExists.total > 0) {
+      throw new ApiError(409, "Challenge already exists");
     }
-    async generateOTP(key, phoneNumber) {
-        const isBlocked = await this.redisDB.readFromRedis(phoneNumber)
-        if (isBlocked) {
-            throw new ApiError(429,"OTP generation temporarily blocked");
-        }
-        const challengeExists = await this.redisDB.readByPhoneNumber(phoneNumber);
-        console
-            .log(challengeExists)
-        if (challengeExists.total > 0) {
-            throw new ApiError(409, "Challenge already exists")
-        }
-        const otp = crypto.randomInt(100000, 1000000).toString();
-        const HmacOTP = this.generateHmacOTP(otp);
-        const otpObject = {
-            phoneNumber,
-            HmacOTP,
-            verificationAttempts: 3,
-            regenrationAttempts: 3,
-        };
-        const isSaved = await this.redisDB.writeToRedisWithTTL(key, otpObject);
-        return otp;
+    const encryptedPhone = cryptoService.encrypt(phoneNumber);
+    const otp = crypto.randomInt(100000, 1000000).toString();
+    const otpHash = cryptoService.generateHmac(otp);
+    const otpObject = {
+      purpose,
+      phoneHash,
+      encryptedPhone,
+      otpHash,
+      verificationAttempts: 3,
+      regenrationAttempts: 3,
+    };
+    const isSaved = await this.redisDB.writeToRedisWithTTL(
+      `otp:challenge:${key}`,
+      otpObject,
+    );
+    return otp;
+  }
+  async validateOTP(key, userOTP) {
+    const redisObject = await this.redisDB.readFromRedis(
+      `otp:challenge:${key}`,
+    );
+    if (!redisObject) {
+      throw new ApiError(404, "challenge Not Found");
     }
-    async validateOTP(key, userOTP) {
-        const redisObject = await this.redisDB.readFromRedis(key);
-        if (!redisObject) {
-            throw new ApiError(404, "challenge Not Found");
-        }
-        const isValid = this.generateHmacOTP(userOTP) === redisObject.HmacOTP;
-         if (!isValid) {
-            await this.redisDB.updateNumRedis(key, "verificationAttempts", -1);
-             if (redisObject.verificationAttempts == 1) {
-            await this.redisDB.writeToRedisWithTTL(redisObject.phoneNumber, "Blocked", 86400)
-            await this.redisDB.deleteFromRedis(key)
-            throw new ApiError(429, "Too many invalid OTP attempts")
-        }
-            throw new ApiError(401, "Invalid OTP");
-        }
-       
-        await this.redisDB.deleteFromRedis(key);
-        return redisObject
+    const isValid = cryptoService.generateHmac(userOTP) === redisObject.otpHash;
+    if (!isValid) {
+      const attemptsLeft = await this.redisDB.updateNumRedis(
+        `otp:challenge:${key}`,
+        "verificationAttempts",
+        -1,
+      );
+      console.log(attemptsLeft)
+      if (attemptsLeft[0] <= 0) {
+        await this.redisDB.writeToRedisWithTTL(
+          `otp:block:phone:${redisObject.phoneHash}`,
+          {
+            Blocked: true,
+            BlockedUntil: new Date(Date.now() + 86400 * 1000).toISOString(),
+          },
+          86400,
+        );
+        await this.redisDB.deleteFromRedis(`otp:challenge:${key}`);
+        throw new ApiError(429, "Too many invalid OTP attempts");
+      }
+      throw new ApiError(401, "Invalid OTP");
     }
+
+    await this.redisDB.deleteFromRedis(`otp:challenge${key}`);
+    return redisObject;
+  }
 }
 
 export default OTPService;

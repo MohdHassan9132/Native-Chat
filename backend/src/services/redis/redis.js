@@ -42,15 +42,20 @@ class Redis {
     async initIndex() {
         try {
             await this.redisDB.ft.create(
-                'idx:number',
+                'idx:otp',
                 {
-                    '$.phoneNumber': {
+                    '$.phoneHash': {
                         type: SCHEMA_FIELD_TYPE.TAG,
-                        AS: 'phoneNumber'
+                        AS: 'phoneHash',
+                    },
+                    '$.emailHash':{
+                        type: SCHEMA_FIELD_TYPE.TAG,
+                        AS: 'emailHash'
                     }
                 },
                 {
-                    ON: 'JSON'
+                    ON: 'JSON',
+                    PREFIX: 'otp:challenge:',
                 }
             );
             console.log('Redis index created')
@@ -78,7 +83,8 @@ class Redis {
         return redisObject || null
     }
     async updateNumRedis(key, field, count) {
-        await this.redisDB.json.numIncrBy(key, '$.' + field, count);
+        const updatedRedisObject = await this.redisDB.json.numIncrBy(key, '$.' + field, count);
+        return updatedRedisObject
     }
 
     async updateRedis(key, field, newValue) {
@@ -89,12 +95,20 @@ class Redis {
         const isDeleted = await this.redisDB.json.del(key)
         return isDeleted;
     }
-    async readByPhoneNumber(phoneNumber) {
+    async readByPhoneHash(phoneHash) {
         const redisObject = await this.redisDB.ft.search(
-            'idx:number',
-            `@phoneNumber:{${phoneNumber}}`
+            'idx:otp',
+            `@phoneHash:{${phoneHash}}`
         )
+        console.log("From redis service: ",redisObject)
         return redisObject;
+    }
+    async readByEmailHash(emailHash){
+        const redisObject = await this.redisDB.ft.search(
+            'idx:otp',
+            `@emailHash:{${emailHash}}`
+        )
+        return redisObject
     }
 }
 

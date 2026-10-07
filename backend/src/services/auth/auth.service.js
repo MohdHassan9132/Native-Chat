@@ -4,6 +4,7 @@ import { ApiError } from '../../utils/api.error.js'
 import { validatePhoneNumber } from '../../validators/user.validator.js'
 import { jsonwebtokens } from '../jwt/jwt.service.js'
 import {smsService} from '../SMS/sms.service.js'
+import { cryptoService } from '../crypto/crypto.service.js'
 class AuthService {
     async register(phoneNumber,otpService) {
         const validatedPhonenumber = validatePhoneNumber(phoneNumber)
@@ -14,20 +15,22 @@ class AuthService {
             throw new ApiError(409,"User already exists")
         }
         const challengeId = crypto.randomUUID()
-        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber);
-        const sendToUser = await smsService.sendSMS({
-            otp,
-            phoneNumber: validatedPhonenumber
-        })
-        if(!sendToUser){
-            throw new ApiError(503,"OTP service is unavailable")
-        }
+        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"register");
+        console.log(otp)
+        // const sendToUser = await smsService.sendSMS({
+        //     otp,
+        //     phoneNumber: validatedPhonenumber
+        // })
+        // if(!sendToUser){
+        //     throw new ApiError(503,"OTP service is unavailable")
+        // }
         return challengeId;
     }
     async verifyRegistration(challengeId,userOTP,otpService){
         const verifiedUser = await otpService.validateOTP(challengeId,userOTP);
-              const dbUser = await userRepo.create({
-            phoneNumber: verifiedUser.phoneNumber,
+        const decryptedPhoneNumber = cryptoService.decrypt(verifiedUser.encryptedPhone)
+            const dbUser = await userRepo.create({
+            phoneNumber: decryptedPhoneNumber,
         });
         const { accessToken, refreshToken } = jsonwebtokens.generateTokens({
             user: dbUser,
@@ -51,14 +54,15 @@ class AuthService {
             throw new ApiError(404,"User not found")
         }
         const challengeId = crypto.randomUUID()
-        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber)
-        const sendToUser = await smsService.sendSMS({
-            otp,
-            phoneNumber: validatedPhonenumber
-        })
-        if(!sendToUser){
-            throw new ApiError(503,"OTP service is unavailable")
-        }
+        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"login")
+        console.log(otp)
+        // const sendToUser = await smsService.sendSMS({
+        //     otp,
+        //     phoneNumber: validatedPhonenumber
+        // })
+        // if(!sendToUser){
+        //     throw new ApiError(503,"OTP service is unavailable")
+        // }
         return challengeId;
     }
     async verifyLogin({
@@ -67,8 +71,9 @@ class AuthService {
         otpService
     }){
         const verifiedUser = await otpService.validateOTP(challengeId,userOTP);
+        const decryptedPhoneNumber = cryptoService.decrypt(verifiedUser.encryptedPhone)
         const dbUser = await userRepo.getUserByPhoneNumber({
-            phoneNumber: verifiedUser.phoneNumber
+            phoneNumber: decryptedPhoneNumber
         })
          const { accessToken, refreshToken } = jsonwebtokens.generateTokens({
             user: dbUser,
