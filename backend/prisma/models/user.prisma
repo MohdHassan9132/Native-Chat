@@ -1,7 +1,8 @@
 model User {
   userId           String    @id @default(uuid())
   name             String?
-  phoneNumber      String? @unique
+  phoneNumber      String @unique
+  email            String? @unique
   profilePicture   Json?
   bio              String?
   createdAt        DateTime?

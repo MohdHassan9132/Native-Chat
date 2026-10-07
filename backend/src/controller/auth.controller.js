@@ -7,7 +7,7 @@ const register = asyncHandler(async(req,res)=>{
     const otpService = req.app.get('otpService')
     const challengeId = await authService.register(phoneNumber,otpService);
     return res.status(200)
-    .json(new ApiResponse(200,"challenge generated",{challengeId}))
+    .json(new ApiResponse(200,"OTP sent successfully",{challengeId}))
 })
 
 const verifyRegistration = asyncHandler(async(req,res)=>{
@@ -21,14 +21,14 @@ const verifyRegistration = asyncHandler(async(req,res)=>{
 })
 
 const login = asyncHandler(async(req,res)=>{
-    const {phoneNumber} = req.body
+    const {identifier} = req.body
     const otpService = req.app.get('otpService');
     const challengeId = await authService.login({
-        phoneNumber,
+        identifier,
         otpService
     })
     return res.status(200)
-    .json(new ApiResponse(200,"Challange generated successfully",{challengeId: challengeId}))
+    .json(new ApiResponse(200,"OTP sent successfully",{challengeId: challengeId}))
 })
 
 const verifyLogin = asyncHandler(async(req,res)=>{
@@ -44,5 +44,6 @@ const verifyLogin = asyncHandler(async(req,res)=>{
     .cookie('accessToken',accessToken)
     .json(new ApiResponse(200,"user logged in successfully",{userData: dbUser}))
 })
+
 
 export{register,verifyRegistration,login,verifyLogin}

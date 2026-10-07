@@ -1,7 +1,7 @@
 import crypto from 'node:crypto'
 import { userRepo } from '../../repository/user.repo.js'
 import { ApiError } from '../../utils/api.error.js'
-import { validatePhoneNumber } from '../../validators/user.validator.js'
+import { validateEmail, validatePhoneNumber } from '../../validators/user.validator.js'
 import { jsonwebtokens } from '../jwt/jwt.service.js'
 import {smsService} from '../SMS/sms.service.js'
 import { cryptoService } from '../crypto/crypto.service.js'
@@ -15,7 +15,7 @@ class AuthService {
             throw new ApiError(409,"User already exists")
         }
         const challengeId = crypto.randomUUID()
-        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"register");
+        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"phoneNumber","register");
         console.log(otp)
         // const sendToUser = await smsService.sendSMS({
         //     otp,
@@ -28,9 +28,9 @@ class AuthService {
     }
     async verifyRegistration(challengeId,userOTP,otpService){
         const verifiedUser = await otpService.validateOTP(challengeId,userOTP);
-        const decryptedPhoneNumber = cryptoService.decrypt(verifiedUser.encryptedPhone)
+        const decryptedIdentifier = cryptoService.decrypt(verifiedUser.encryptedIdentifier)
             const dbUser = await userRepo.create({
-            phoneNumber: decryptedPhoneNumber,
+            phoneNumber: decryptedIdentifier,
         });
         const { accessToken, refreshToken } = jsonwebtokens.generateTokens({
             user: dbUser,
@@ -43,18 +43,27 @@ class AuthService {
         return { accessToken, refreshToken, dbUser };
     }
     async login({
-        phoneNumber,
+        identifier,
         otpService
     }){
-        const validatedPhonenumber = validatePhoneNumber(phoneNumber)
-        const isUser = await userRepo.getUserByPhoneNumber({
-            phoneNumber: validatedPhonenumber
-        })
+        if(typeof identifier !== "string"){
+            throw new ApiError(400,"Identifier must be of string type")
+        }
+        const identifierType = identifier?.includes('@') ? "email":"phoneNumber"
+        let validatedIdentifier;
+        if(identifierType === "email"){
+            validatedIdentifier = validateEmail(identifier)
+        }else if (identifierType === "phoneNumber"){
+            validatedIdentifier = validatePhoneNumber(identifier)
+        }else{
+            throw new ApiError(400,"Invalid Identifier")
+        }
+        const isUser = identifierType === "email" ? await userRepo.getUserByEmail({email: validatedIdentifier}) : await userRepo.getUserByPhoneNumber({phoneNumber: validatedIdentifier})
         if(!isUser){
             throw new ApiError(404,"User not found")
         }
         const challengeId = crypto.randomUUID()
-        const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"login")
+        const otp = await otpService.generateOTP(challengeId,validatedIdentifier,identifierType,"login")
         console.log(otp)
         // const sendToUser = await smsService.sendSMS({
         //     otp,
@@ -71,10 +80,8 @@ class AuthService {
         otpService
     }){
         const verifiedUser = await otpService.validateOTP(challengeId,userOTP);
-        const decryptedPhoneNumber = cryptoService.decrypt(verifiedUser.encryptedPhone)
-        const dbUser = await userRepo.getUserByPhoneNumber({
-            phoneNumber: decryptedPhoneNumber
-        })
+        const decryptedIdentifier = cryptoService.decrypt(verifiedUser.encryptedIdentifier)
+        const dbUser = verifiedUser.identifierType === "email" ? await userRepo.getUserByEmail({email: decryptedIdentifier}): await userRepo.getUserByPhoneNumber({phoneNumber: decryptedIdentifier})
          const { accessToken, refreshToken } = jsonwebtokens.generateTokens({
             user: dbUser,
         });

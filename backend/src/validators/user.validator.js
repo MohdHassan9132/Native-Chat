@@ -39,10 +39,19 @@ const validateBio = (bio)=>{
   }
   return result.data
 }
+const emailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+const validateEmail = (email)=>{
+  const result = emailSchema.safeParse(email)
+  if(!result.success){
+    throw new ApiError(400,result.error.issues[0].message)
+  }
+  return result.data
+}
 
 
 export {
   validateName,
   validatePhoneNumber,
-  validateBio
+  validateBio,
+  validateEmail
 };
