@@ -6,7 +6,6 @@ import { jsonwebtokens } from '../jwt/jwt.service.js'
 import {smsService} from '../SMS/sms.service.js'
 import { cryptoService } from '../crypto/crypto.service.js'
 import {nodemailerInstance} from '../email/email.service.js'
-import { send } from 'node:process'
 class AuthService {
     async register(phoneNumber,otpService) {
         const validatedPhonenumber = validatePhoneNumber(phoneNumber)
