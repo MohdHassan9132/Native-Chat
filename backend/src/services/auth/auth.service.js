@@ -5,6 +5,8 @@ import { validateEmail, validatePhoneNumber } from '../../validators/user.valida
 import { jsonwebtokens } from '../jwt/jwt.service.js'
 import {smsService} from '../SMS/sms.service.js'
 import { cryptoService } from '../crypto/crypto.service.js'
+import {nodemailerInstance} from '../email/email.service.js'
+import { send } from 'node:process'
 class AuthService {
     async register(phoneNumber,otpService) {
         const validatedPhonenumber = validatePhoneNumber(phoneNumber)
@@ -16,7 +18,6 @@ class AuthService {
         }
         const challengeId = crypto.randomUUID()
         const otp = await otpService.generateOTP(challengeId,validatedPhonenumber,"phoneNumber","register");
-        console.log(otp)
         // const sendToUser = await smsService.sendSMS({
         //     otp,
         //     phoneNumber: validatedPhonenumber
@@ -64,14 +65,14 @@ class AuthService {
         }
         const challengeId = crypto.randomUUID()
         const otp = await otpService.generateOTP(challengeId,validatedIdentifier,identifierType,"login")
-        console.log(otp)
-        // const sendToUser = await smsService.sendSMS({
-        //     otp,
-        //     phoneNumber: validatedPhonenumber
-        // })
-        // if(!sendToUser){
-        //     throw new ApiError(503,"OTP service is unavailable")
-        // }
+        const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
+            otp,
+            phoneNumber: validatedIdentifier
+        }): await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
+        console.log(sendToUser)
+        if(!sendToUser){
+            throw new ApiError(503,"OTP service is unavailable")
+        }
         return challengeId;
     }
     async verifyLogin({

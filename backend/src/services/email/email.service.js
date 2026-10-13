@@ -16,12 +16,9 @@ class nodemailerService extends emailService {
     }
 
     async sendEmail(to, subject, htmlBody) {
-        console.log("sendEmail method started...");
-        console.log("ENV EMAIL: ", process.env.SMTP_USER_EMAIL);
-        console.log("ENV APP PASSWORD: ", process.env.SMTP_APP_PASSWORD);
 
         // main method begins here - just logs for testing above :)
-        await this.transporter.sendMail({
+        return await this.transporter.sendMail({
             from: process.env.SMTP_USER_EMAIL,
             to,
             subject,
