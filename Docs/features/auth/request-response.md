@@ -25,7 +25,9 @@ POST/register
 
 ### Request Body
 
-ContentType: application/json
+```http
+Content-Type: application/json
+```
 
 ```json
 {
@@ -57,7 +59,6 @@ ContentType: application/json
 {
     "statusCode": 409,
     "message": "User already exists!",
-    "data": null
 }
 ```
 
@@ -71,7 +72,9 @@ POST/register/verify
 
 ### Request Body
 
-ContentType: application/json
+```http
+Content-Type: application/json
+```
 
 ```json
 {
@@ -81,6 +84,8 @@ ContentType: application/json
 ```
 
 ### Responses
+
+**Success**
 
 201
 
@@ -113,7 +118,6 @@ ContentType: application/json
 {
     "statusCode": 401,
     "message": "Invalid OTP",
-    "data": null
 }
 ```
 
@@ -123,7 +127,6 @@ ContentType: application/json
 {
     "statusCode": 404,
     "message": "Challenge not found",
-    "data": null
 }
 ```
 
@@ -133,7 +136,6 @@ ContentType: application/json
 {
     "statusCode": 429,
     "message": "Too many attempts",
-    "data": null
 }
 ```
 
@@ -147,6 +149,140 @@ POST/login
 
 ### Request Body
 
-```json
-{}
+```http
+Content-Type: application/json
 ```
+
+**With Contact Number**
+```json
+
+{
+    "identifier": "+91**********"
+}
+```
+**With Email**
+```json
+{
+    "identifier": "support@nativechat.com"
+}
+```
+
+### Responses
+**Success**
+
+200
+```json
+{
+    "statusCode": 200,
+    "message": "OTP sent successfully",
+    "data": {
+        "challengeId": "180f63d1-3628-4239-b53f-23a11e8b22f0"
+    }
+}
+```
+
+**Errors**
+
+404
+
+```json
+{
+    "statusCode": 404,
+    "message": "User not found"
+}
+```
+409
+```json
+{
+    "statusCode": 409,
+    "message": "Challenge already exists"
+}
+```
+
+429
+```json
+{
+    "statusCode": 429,
+    "message": "OTP generation blocked"
+}
+```
+
+## POST/login/verify
+
+```http
+POST/login/verify
+```
+
+### RequestBody
+```http
+Content-Type: application/json
+```
+
+```json
+{
+    "challengeId":"84dbf03d-5091-4467-9f1e-b752322a25a4",
+    "userOTP":"272860"
+}
+```
+
+### Responses
+
+**Success**
+
+200
+
+```json
+{
+    "statusCode": 200,
+    "message": "user logged in successfully",
+    "data": {
+        "userData": {
+            "userId": "",
+            "name": "Mohammad Hassan",
+            "phoneNumber": "+91**********",
+            "email": "support@nativechat.com",
+            "profilePicture": null,
+            "bio": null,
+            "createdAt": null,
+            "updatedAt": null,
+            "lastSeen": null,
+            "status": null,
+            "refreshToken": "c*****b39f",
+            "isBlocked": false
+        }
+    }
+}
+```
+
+**Errors**
+
+401
+
+```json
+{
+    "statusCode": 401,
+    "message": "Invalid OTP",
+}
+```
+
+404
+
+```json
+{
+    "statusCode": 404,
+    "message": "Challenge not found",
+}
+```
+
+429
+
+```json
+{
+    "statusCode": 429,
+    "message": "Too many attempts",
+}
+```
+
+
+
+
