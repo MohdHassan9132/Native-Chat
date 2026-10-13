@@ -65,11 +65,13 @@ class AuthService {
         }
         const challengeId = crypto.randomUUID()
         const otp = await otpService.generateOTP(challengeId,validatedIdentifier,identifierType,"login")
-        const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
-            otp,
-            phoneNumber: validatedIdentifier
-        }): await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
-        console.log(sendToUser)
+        // const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
+        //     otp,
+        //     phoneNumber: validatedIdentifier
+        // }): await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
+        //Not seding via SMS for testing
+        const sendToUser = identifierType === "phoneNumber" ? otp : await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
+        console.log(otp)
         if(!sendToUser){
             throw new ApiError(503,"OTP service is unavailable")
         }
