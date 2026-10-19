@@ -1,15 +1,26 @@
-import {rateLimit} from 'express-rate-limit'
-import {ApiError} from '../utils/api.error.js'
-const authRateLimiter = rateLimit({
-    windowMs: 60*60*1000,
-    limit: 3,
-    standardHeaders: true,
-    legacyHeaders: true,
-    ipv6Subnet: 56,
-    handler: (req,res,next,options)=>{
-        next(new ApiError(429,"Auth Routes are restricted"))
+import { rateLimit } from 'express-rate-limit'
+import { ApiError } from '../utils/api.error.js'
+export const rateLimiter = function ({
+    time,
+    limit,
+    message
+}) {
+    if(typeof message !== "string" || message.trim() === ''){
+        message = "Too many request, Please try again later."
     }
-})
+    return rateLimit({
+        windowMs: time,
+        limit: limit,
+        standardHeaders: true,
+        legacyHeaders: true,
+        ipv6Subnet: 56,
+        handler: (req, res, next, options) => {
+            next(new ApiError(429, message))
+        }
+    })
+}
+
+
 
 // message: async(req,res,next)=>{
 //         return res.status(429).json(
@@ -19,5 +30,3 @@ const authRateLimiter = rateLimit({
 //             }
 //         )
 //     }
-
-export {authRateLimiter}

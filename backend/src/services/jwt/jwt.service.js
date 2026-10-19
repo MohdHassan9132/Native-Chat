@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { ApiError } from "../../utils/api.error.js";
 import jwt from 'jsonwebtoken'
 import crypto from 'node:crypto'

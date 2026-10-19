@@ -3,7 +3,6 @@ import {userRouter} from './router/user.router.js'
 import { chatRouter } from "./router/chat.router.js";
 import cookieParser from 'cookie-parser'
 import { authRouter } from "./router/auth.router.js";
-import { authRateLimiter } from "./middlewares/ratelimiter.middleware.js";
 
 const app = express();
 
@@ -29,6 +28,6 @@ app.get("/", (req, res) => {
 
 app.use('/api/users',userRouter)
 app.use('/api/chats',chatRouter)
-app.use('/api/auth',authRateLimiter,authRouter)
+app.use('/api/auth',authRouter)
 
 export default app;
