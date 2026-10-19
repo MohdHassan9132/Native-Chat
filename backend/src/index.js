@@ -11,13 +11,12 @@ import OTPService from "./services/OTP/otp.service.js";
 import OTPRepo from "./repository/otp.repo.js";
 
 const PORT = process.env.PORT || 8000;
-const SERVER_ID = process.env.SERVER_ID || `server-${PORT}`;
 
 const httpServer = http.createServer(app);
-
-const webSocket = new WebSocket(httpServer);
 const redis = new Redis();
-
+await redis.initRedis();
+await redis.initIndex();
+const webSocket = new WebSocket(httpServer,redis);
 const otpRepo = new OTPRepo(redis)
 const OtpService = new OTPService(otpRepo)
 app.set('otpService',OtpService)
@@ -25,11 +24,9 @@ app.set('otpService',OtpService)
 const messagingService = new MessageService(
     redis,
     webSocket,
-    SERVER_ID
 );
 
-await redis.initRedis();
-await redis.initIndex();
+
 
 await redis.redisSubscriber("messages", (data) => {
     const message = JSON.parse(data);

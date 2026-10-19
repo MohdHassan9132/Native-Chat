@@ -3,10 +3,17 @@ import { createClient, SCHEMA_FIELD_TYPE } from "redis"
 class Redis {
 
     constructor() {
-        this.subscriber = createClient({
+        this.adapterPub = createClient({
+            url: process.env.REDIS_URL
+        }) 
+        this.adapterSub = createClient({
             url: process.env.REDIS_URL
         })
 
+
+        this.subscriber = createClient({
+            url: process.env.REDIS_URL
+        })
         this.publisher = createClient({
             url: process.env.REDIS_URL
         })
@@ -17,11 +24,19 @@ class Redis {
 
     async initRedis() {
 
-        await this.subscriber.connect()
-        console.log("subscriber connected")
-        await this.publisher.connect()
-        console.log("publisher connected")
-        await this.redisDB.connect()
+        try {
+            await Promise.all([
+                this.adapterPub.connect(),
+                this.adapterSub.connect(),
+                this.subscriber.connect(),
+                this.publisher.connect(),
+                this.redisDB.connect()
+            ])
+        } catch (error) {
+            console.log(`One of the redis connection failed`)
+            throw error
+        }
+        
     }
 
     async publish(channel, message) {
