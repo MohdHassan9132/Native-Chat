@@ -39,13 +39,13 @@ class UserRepo{
             return true;
         }
     }
-    async updateUser(userId,bio,name){
+    async updateUser(userId,email,name){
         const updatedUser = await prisma.user.update({
             where:{
                 userId,
             },
             data:{
-                bio,
+                email,
                 name
             }
         })

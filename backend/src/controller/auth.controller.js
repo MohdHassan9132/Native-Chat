@@ -5,9 +5,9 @@ import { authService } from '../services/auth/auth.service.js'
 const register = asyncHandler(async(req,res)=>{
     const {phoneNumber} = req.body
     const otpService = req.app.get('otpService')
-    const challengeId = await authService.register(phoneNumber,otpService);
+    const {challengeId,alreadyExists} = await authService.register(phoneNumber,otpService);
     return res.status(200)
-    .json(new ApiResponse(200,"OTP sent successfully",{challengeId}))
+    .json(new ApiResponse(200,alreadyExists ? "An OTP is already active" : "OTP sent successfully",{challengeId,alreadyExists}))
 })
 
 const verifyRegistration = asyncHandler(async(req,res)=>{
@@ -23,12 +23,12 @@ const verifyRegistration = asyncHandler(async(req,res)=>{
 const login = asyncHandler(async(req,res)=>{
     const {identifier} = req.body
     const otpService = req.app.get('otpService');
-    const challengeId = await authService.login({
+    const {challengeId,alreadyExists} = await authService.login({
         identifier,
         otpService
     })
     return res.status(200)
-    .json(new ApiResponse(200,"OTP sent successfully",{challengeId: challengeId}))
+    .json(new ApiResponse(200,alreadyExists ? "An OTP is already active" : "OTP sent successfully",{challengeId,alreadyExists}))
 })
 
 const verifyLogin = asyncHandler(async(req,res)=>{

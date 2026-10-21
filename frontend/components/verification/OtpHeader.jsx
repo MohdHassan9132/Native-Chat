@@ -23,10 +23,10 @@ export default function OtpHeader({ onClose, closeButtonRef, titleId }) {
             <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M9 12l2 2 4-4m5-4v9a9 9 0 11-18 0V6l9-3 9 3z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            <span>SMS Verification</span>
+            <span>Secure Verification</span>
           </div>
           <h2 id={titleId} className="text-[22px] leading-tight font-extrabold text-brand-charcoal">
-            Verify your number
+            Verify your account
           </h2>
         </div>
       </div>

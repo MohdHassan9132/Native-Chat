@@ -1,13 +1,15 @@
 import { userRepo } from "../../repository/user.repo.js"
-import { validateBio, validateName, validatePhoneNumber } from "../../validators/user.validator.js"
+import { validateEmail, validateName, validatePhoneNumber } from "../../validators/user.validator.js"
 import {ApiError} from '../../utils/api.error.js'
 import {jsonwebtokens} from '../jwt/jwt.service.js'
 
 class UserService {
-    async completeProfile(userId,name,bio){
-        const validatedBio = validateBio(bio)
+    async completeProfile(userId,name,email){
+        const validatedEmail = validateEmail(email)
         const validatedName = validateName(name)
-        const updatedUser = await userRepo.updateUser(userId,validatedBio,validatedName)
+        const existingUser = await userRepo.getUserByEmail({email: validatedEmail})
+        if(existingUser && existingUser.userId !== userId) throw new ApiError(409,"That email is already linked to another account")
+        const updatedUser = await userRepo.updateUser(userId,validatedEmail,validatedName)
         return updatedUser;
     }
     async getUserByPhoneNumber(phoneNumber){

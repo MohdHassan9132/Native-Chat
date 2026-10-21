@@ -41,7 +41,7 @@ export default function OtpResend({ secondsLeft, onResend, onChangeNumber }) {
         onClick={onChangeNumber}
         className="text-[11px] text-neutral-500 hover:text-brand-charcoal underline decoration-dotted mt-1"
       >
-        Change phone number
+        Change details
       </button>
     </div>
   );

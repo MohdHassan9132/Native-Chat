@@ -1,10 +1,11 @@
 const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export class ApiRequestError extends Error {
-  constructor(message, status) {
+  constructor(message, status, data = null) {
     super(message);
     this.name = "ApiRequestError";
     this.status = status;
+    this.data = data;
   }
 }
 
@@ -16,7 +17,11 @@ const FALLBACK_MESSAGES = {
   409: "That already exists.",
   503: "The service is temporarily unavailable. Please try again shortly.",
   498: "Your session has expired. Please log in again.",
+  429: "Too many attempts. Please wait a little before trying again.",
 };
+
+const isProtectedApiPath = (path) =>
+  path.startsWith("/api/chats/") || path.startsWith("/api/users/complete-profile");
 
 /**
  * Sends a JSON request with cookies and returns the backend's `data` payload
@@ -44,11 +49,29 @@ export async function apiRequest(path, { method = "GET", body } = {}) {
   }
 
   if (!response.ok) {
-    const message =
-      (response.status < 500 && payload?.message) ||
-      FALLBACK_MESSAGES[response.status] ||
-      "Something went wrong on our side. Please try again.";
-    throw new ApiRequestError(message, response.status);
+    if (
+      typeof window !== "undefined" &&
+      isProtectedApiPath(path) &&
+      (response.status === 401 || response.status === 498) &&
+      window.location.pathname !== "/"
+    ) {
+      window.location.replace("/");
+    }
+
+    let message = response.status >= 500
+      ? "Something went wrong on our side. Please try again shortly."
+      : FALLBACK_MESSAGES[response.status] || payload?.message || "Please try again.";
+    const block = payload?.data;
+    if (response.status === 429 && block?.blockedUntil) {
+      const blockedTime = new Date(block.blockedUntil);
+      const timeLabel = Number.isNaN(blockedTime.getTime())
+        ? block.blockedUntil
+        : blockedTime.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+      const contactLabel = block.identifierType === "email" ? "email address" : "phone number";
+      const alternateLabel = block.alternateIdentifierType === "email" ? "email address" : "phone number";
+      message = `Your ${contactLabel} is blocked until ${timeLabel}. Try signing in with the ${alternateLabel} linked to your account, or retry this ${contactLabel} after that time.`;
+    }
+    throw new ApiRequestError(message, response.status, block);
   }
 
   return payload?.data;

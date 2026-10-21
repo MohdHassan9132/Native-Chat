@@ -51,14 +51,45 @@ Content-Type: application/json
 }
 ```
 
+200 (when a valid challenge for the same purpose is already active)
+
+The API returns the existing `challengeId` with `alreadyExists: true`; the existing OTP remains valid and a duplicate code is not generated.
+
+```json
+{
+    "statusCode": 200,
+    "message": "An OTP is already active",
+    "data": {
+        "challengeId": "1cf9d48f-69cb-4ced-80bc-5f1dd6d3c6cf",
+        "alreadyExists": true
+    }
+}
+```
+
 **Errors**
 
-409
+409 (user already exists, or a challenge exists for a different verification purpose/contact type)
 
 ```json
 {
     "statusCode": 409,
     "message": "User already exists!",
+}
+```
+
+429 (the contact is temporarily blocked)
+
+The response includes the UTC `blockedUntil` timestamp and the alternate contact type that can be used to sign in.
+
+```json
+{
+    "statusCode": 429,
+    "message": "This contact is temporarily blocked",
+    "data": {
+        "blockedUntil": "2026-10-22T12:00:00.000Z",
+        "identifierType": "phoneNumber",
+        "alternateIdentifierType": "email"
+    }
 }
 ```
 
@@ -135,7 +166,12 @@ Content-Type: application/json
 ```json
 {
     "statusCode": 429,
-    "message": "Too many attempts",
+    "message": "This contact is temporarily blocked",
+    "data": {
+        "blockedUntil": "2026-10-22T12:00:00.000Z",
+        "identifierType": "phoneNumber",
+        "alternateIdentifierType": "email"
+    }
 }
 ```
 
@@ -191,11 +227,13 @@ Content-Type: application/json
     "message": "User not found"
 }
 ```
-409
+200 (when a valid login challenge for the same identifier is already active; returns its existing `challengeId` and `alreadyExists: true` without generating another OTP)
+
+409 (a challenge exists for a different verification purpose/contact type)
 ```json
 {
     "statusCode": 409,
-    "message": "Challenge already exists"
+    "message": "A verification is already in progress for this contact"
 }
 ```
 
@@ -203,7 +241,12 @@ Content-Type: application/json
 ```json
 {
     "statusCode": 429,
-    "message": "OTP generation blocked"
+    "message": "This contact is temporarily blocked",
+    "data": {
+        "blockedUntil": "2026-10-22T12:00:00.000Z",
+        "identifierType": "email",
+        "alternateIdentifierType": "phoneNumber"
+    }
 }
 ```
 
@@ -279,7 +322,12 @@ Content-Type: application/json
 ```json
 {
     "statusCode": 429,
-    "message": "Too many attempts",
+    "message": "This contact is temporarily blocked",
+    "data": {
+        "blockedUntil": "2026-10-22T12:00:00.000Z",
+        "identifierType": "email",
+        "alternateIdentifierType": "phoneNumber"
+    }
 }
 ```
 

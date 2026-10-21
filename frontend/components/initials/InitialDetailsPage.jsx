@@ -6,7 +6,6 @@ import AppTopBar from "@/components/shared/AppTopBar";
 import InitialsHeader from "./InitialsHeader";
 import ProfileAvatar, { DEFAULT_AVATAR_SRC } from "./ProfileAvatar";
 import ProfileNameCard from "./ProfileNameCard";
-import ProfileBioCard from "./ProfileBioCard";
 import ProfileFooter from "./ProfileFooter";
 import OtpErrorBanner from "@/components/verification/OtpErrorBanner";
 import { completeProfile } from "@/lib/api/users";
@@ -28,15 +27,13 @@ function HelpIcon() {
 export default function InitialDetailsPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
+  const [email, setEmail] = useState("");
   const [avatarSrc, setAvatarSrc] = useState(DEFAULT_AVATAR_SRC);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const nameInputRef = useRef(null);
-  const bioTextareaRef = useRef(null);
 
-  const canContinue = name.trim().length > 0;
+  const canContinue = name.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 
   // Revoke the previous blob: URL whenever it's replaced/unmounted so we
   // don't leak memory across photo picks.
@@ -46,10 +43,6 @@ export default function InitialDetailsPage() {
     };
   }, [avatarSrc]);
 
-  function handleSelectMood(mood) {
-    setBio(mood);
-    bioTextareaRef.current?.focus();
-  }
 
   // Saves the profile (PATCH /api/users/complete-profile); the auth cookie was
   // set when the OTP was verified.
@@ -58,7 +51,7 @@ export default function InitialDetailsPage() {
     setSubmitting(true);
     setError("");
     try {
-      await completeProfile({ name: name.trim(), bio: bio.trim() });
+      await completeProfile({ name: name.trim(), email: email.trim() });
       router.push("/home");
     } catch (err) {
       setError(err.message);
@@ -77,13 +70,12 @@ export default function InitialDetailsPage() {
           <ProfileAvatar avatarSrc={avatarSrc} onAvatarChange={setAvatarSrc} />
 
           <div className="flex flex-col gap-4">
-            <ProfileNameCard name={name} onNameChange={setName} inputRef={nameInputRef} />
-            <ProfileBioCard
-              bio={bio}
-              onBioChange={setBio}
-              onSelectMood={handleSelectMood}
-              textareaRef={bioTextareaRef}
-            />
+            <ProfileNameCard name={name} onNameChange={setName} />
+            <div className="bg-white p-4 rounded-2xl ink-border shadow-ink-sm flex flex-col gap-2">
+              <label htmlFor="profileEmail" className="text-xs font-bold text-brand-charcoal uppercase tracking-wider">Email address</label>
+              <input id="profileEmail" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" className="w-full rounded-xl bg-brand-surface p-3 text-sm outline-none focus:ring-2 focus:ring-brand-cyanDark" />
+              <p className="text-xs text-neutral-500">Add an email so you can sign in with either your email or phone.</p>
+            </div>
           </div>
 
           {error && (

@@ -3,6 +3,7 @@ import {userRouter} from './router/user.router.js'
 import { chatRouter } from "./router/chat.router.js";
 import cookieParser from 'cookie-parser'
 import { authRouter } from "./router/auth.router.js";
+import { ApiResponse } from "./utils/api.response.js";
 
 const app = express();
 
@@ -29,5 +30,12 @@ app.get("/", (req, res) => {
 app.use('/api/users',userRouter)
 app.use('/api/chats',chatRouter)
 app.use('/api/auth',authRouter)
+
+app.use((error, req, res, next) => {
+    if (res.headersSent) return next(error);
+    const statusCode = Number.isInteger(error.statusCode) ? error.statusCode : 500;
+    const message = statusCode >= 500 ? "Something went wrong. Please try again shortly." : error.message;
+    return res.status(statusCode).json(new ApiResponse(statusCode, message, error.data || undefined));
+});
 
 export default app;

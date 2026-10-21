@@ -39,7 +39,7 @@ const validateBio = (bio)=>{
   }
   return result.data
 }
-const emailSchema = z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+const emailSchema = z.string().trim().toLowerCase().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, {message: "Enter a valid email address"})
 const validateEmail = (email)=>{
   const result = emailSchema.safeParse(email)
   if(!result.success){
