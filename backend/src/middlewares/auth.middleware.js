@@ -3,7 +3,7 @@ import { ApiError } from "../utils/api.error.js";
 import {asyncHandler} from '../utils/asyncHandler.js'
 import {userRepo} from '../repository/user.repo.js'
 const verifySocketConnection = async (socket, next) => {
-    const token = socket.handshake.auth.token;
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
 
     if (!token) {
         return next(new ApiError(401, "Auth Token is missing"));
@@ -18,7 +18,7 @@ const verifySocketConnection = async (socket, next) => {
         if(!dbUser){
             throw new ApiError(404,"User no longer exists")
         }
-        socket.handshake.user = user;
+        socket.user = user;
         return next();
     } catch (error) {
 

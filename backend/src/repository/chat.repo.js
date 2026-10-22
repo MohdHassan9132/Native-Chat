@@ -38,6 +38,14 @@ class ChatRepo {
         })
         return chats;
     }
+    async getChatById(chatId){
+        const chat = await prisma.chat.findUnique({
+            where:{
+                chatId
+            }
+        })
+        return chat
+    }
 }
 
 export const chatRepo = new ChatRepo()

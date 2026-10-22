@@ -1,20 +1,27 @@
 class MessageService {
 
-    constructor(webSocket) {
-        this.webSocket = webSocket
+    constructor(deliveryService) {
+        this.delivePryService = deliveryService
     }
+    async send(currentUser, socketId, payload) {
+        const cleanPayload = validateMessagePayload(payload);
 
-    async sendMessage(message) {
-        
-    }
+        const savedMessage = await messageRepo.saveMessage({
+            chatId: cleanPayload.chatId,
+            senderId: currentUser.userId,
+            receiverId: cleanPayload.receiverId,
+            content: cleanPayload.content
+        });
 
-    deliverMessage(data) {
-        console.log(
-            "message received from redis",
-            data
-        )
-    
+       
+        this.deliveryService.broadcastMessage(
+            cleanPayload.chatId,
+            events.message.new,
+            savedMessage
+        );
+
+        return savedMessage;
     }
 }
 
-export default MessageService
+export default MessageService;

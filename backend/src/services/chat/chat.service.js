@@ -3,6 +3,9 @@ import { userRepo } from '../../repository/user.repo.js'
 import { ApiError } from '../../utils/api.error.js'
 import { validatePhoneNumber } from '../../validators/user.validator.js'
 class ChatService {
+    constructor(deliveryService){
+        this.deliveryService = deliveryService
+    }
     async create({
         phoneNumber,
         userObject//The user who is creating the chat,coming from the req.user
@@ -41,6 +44,19 @@ class ChatService {
         })
         return chats
     }
+    async joinChatRoom(user,socketId,chatId){
+        const isChat = await chatRepo.getChatById(chatId)
+        if(!isChat){
+            throw new ApiError(404,"Chat room not found")
+        }
+        const isMember = isChat.user1Id === user.userId || isChat.user2Id === user.userId
+        if(!isMember){
+            throw new ApiError(403,"Unauthorized to join this chat")
+        }
+        const channelName = `stream:chat:${chatId}`;
+        this.deliveryService.joinChannel(socketId, channelName);
+        return { success: true, message: "Joined channel successfully" };
+    }
 }
 
-export const chatService = new ChatService()
+export default ChatService

@@ -10,6 +10,8 @@ model Chat{
 
     user1 User @relation("User1Chats",fields: [user1Id],references: [userId])
     user2 User @relation("User2Chats",fields: [user2Id],references: [userId])
+
+    messages  Message[]
     @@unique([user1Id,user2Id])
 
 }

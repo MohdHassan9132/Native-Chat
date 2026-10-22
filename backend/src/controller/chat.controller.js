@@ -1,9 +1,9 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiResponse} from '../utils/api.response.js'
-import { chatService } from "../services/chat/chat.service.js";
 
 const createChat = asyncHandler(async(req,res)=>{
     const {phoneNumber} = req.body
+    const chatService = app.get('chatService')
     const newChat = await chatService.create({
         phoneNumber,
         userObject: req.user
@@ -12,6 +12,7 @@ const createChat = asyncHandler(async(req,res)=>{
 })
 
 const getChats = asyncHandler(async(req,res)=>{
+    const chatService = app.get('chatService')
     const chats = await chatService.getChats({
         userId: req.user.userId
     })

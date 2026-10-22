@@ -1,11 +1,15 @@
 model Message {
   messageId  String   @id @default(uuid())
+  chatId     String
+  chat       Chat     @relation(fields: [chatId], references: [chatId], onDelete: Cascade)
   senderId   String
   sender     User     @relation("SentMessages", fields: [senderId], references: [userId])
   receiverId String
   receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [userId])
   content    String
   createdAt  DateTime @default(now())
+
+ 
 }
 
 

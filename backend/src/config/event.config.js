@@ -1,8 +1,11 @@
 const events = {
     message: {
-        send: "send", // when client sends something
-        new: "new" // a new message received either from client or redis
+        send: "message:send", // when client sends something
+        new: "message:new" // a new message received either from client or redis
+    },
+    chat:{
+        join: "chat:join",
+        leave: "chat:leave"
     }
 }
-
 export { events }
