@@ -1,27 +1,26 @@
 import { jsonwebtokens } from "../services/jwt/jwt.service.js";
 import { ApiError } from "../utils/api.error.js";
-import {asyncHandler} from '../utils/asyncHandler.js'
-import {userRepo} from '../repository/user.repo.js'
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { userRepo } from "../repository/user.repo.js";
+
 const verifySocketConnection = async (socket, next) => {
-    const token = socket.handshake.auth.token || socket.handshake.query.token;
+    const token = socket.handshake.auth?.token || socket.handshake.query?.token;
 
     if (!token) {
         return next(new ApiError(401, "Auth Token is missing"));
     }
 
     try {
-
         const user = jsonwebtokens.verifyJWT({ token });
         const dbUser = await userRepo.getUserById({
             userId: user.userId
-        })
-        if(!dbUser){
-            throw new ApiError(404,"User no longer exists")
+        });
+        if (!dbUser) {
+            throw new ApiError(404, "User no longer exists");
         }
-        socket.user = user;
+        socket.user = { ...dbUser, userId: user.userId };
         return next();
     } catch (error) {
-
         let apiError;
 
         if (error.name === "TokenExpiredError") {
@@ -36,15 +35,19 @@ const verifySocketConnection = async (socket, next) => {
     }
 };
 
-const verifyJWT = asyncHandler((req,res,next) => {
-    const token = req?.cookies?.accessToken
+const verifyJWT = asyncHandler((req, res, next) => {
+    const authHeader = req.headers?.authorization;
+    const headerToken = authHeader ? authHeader.replace(/^Bearer\s+/i, "") : null;
+    const token = req?.cookies?.accessToken || headerToken;
+
     if (!token) {
-        throw new ApiError(401, "Auth Token is missing")
+        throw new ApiError(401, "Auth Token is missing");
     }
+
     try {
-        const user = jsonwebtokens.verifyJWT({ token })
-        req.user = user
-        next()
+        const user = jsonwebtokens.verifyJWT({ token });
+        req.user = user;
+        next();
     } catch (error) {
         if (error.name === "TokenExpiredError") {
             throw new ApiError(498, "Token Expired");
@@ -53,9 +56,7 @@ const verifyJWT = asyncHandler((req,res,next) => {
         } else {
             throw new ApiError(401, "Authentication Failed");
         }
-
-        
     }
-})
+});
 
-export { verifySocketConnection, verifyJWT }
+export { verifySocketConnection, verifyJWT };

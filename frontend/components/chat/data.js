@@ -53,10 +53,6 @@ const CONVERSATIONS_BY_ID = {
   },
 };
 
-// UI phase: every id currently resolves to the same mock conversation
-// rather than crashing on an unknown id — see route notes for how this
-// narrows to a real per-id lookup (and a real not-found state) once a
-// backend exists.
 export function getConversation(id) {
-  return CONVERSATIONS_BY_ID[id] ?? CONVERSATIONS_BY_ID["ahmad-syarif"];
+  return CONVERSATIONS_BY_ID[id] || null;
 }

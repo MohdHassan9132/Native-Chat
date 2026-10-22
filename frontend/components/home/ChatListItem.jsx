@@ -6,12 +6,13 @@ const CHECK_CLASSES = {
   delivered: "text-emerald-500",
 };
 
-export default function ChatListItem({ conversation }) {
+export default function ChatListItem({ conversation, onSelect }) {
   const { name, preview, clamp, time, check, unread, online, bg, Avatar } = conversation;
 
   return (
     <Link
       href={`/chat/${conversation.id}`}
+      onClick={() => onSelect?.(conversation.id)}
       className="w-full text-left bg-white p-3 rounded-2xl ink-border shadow-ink-sm flex items-center justify-between active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyanDark"
     >
       <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -51,8 +52,11 @@ export default function ChatListItem({ conversation }) {
           )}
           <span>{time}</span>
         </span>
-        {unread != null && (
-          <span className="w-5 h-5 rounded-full bg-emerald-600 border-[1.5px] border-brand-charcoal text-white font-extrabold text-[11px] flex items-center justify-center">
+        {unread != null && unread > 0 && (
+          <span
+            aria-label={`${unread} new messages`}
+            className="min-w-[20px] h-5 px-1.5 rounded-full bg-blue-600 border-[1.5px] border-brand-charcoal text-white font-extrabold text-[11px] flex items-center justify-center shadow-ink-sm animate-in fade-in zoom-in duration-150"
+          >
             {unread}
           </span>
         )}

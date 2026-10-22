@@ -13,6 +13,10 @@ class MessageRepo {
     async getChatHistory({ chatId }) {
         return await prisma.message.findMany({
             where: { chatId },
+            orderBy: { createdAt: "asc" },
+            include: {
+                sender: { select: { userId: true, name: true } }
+            }
         });
     }
 }

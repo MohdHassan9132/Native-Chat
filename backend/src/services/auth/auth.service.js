@@ -21,6 +21,7 @@ class AuthService {
         //     otp,
         //     phoneNumber: validatedPhonenumber
         // })
+        console.log(otp)
         // if(!sendToUser){
         //     throw new ApiError(503,"OTP service is unavailable")
         // }
@@ -64,6 +65,7 @@ class AuthService {
         }
         const challengeId = crypto.randomUUID()
         const otp = await otpService.generateOTP(challengeId,validatedIdentifier,identifierType,"login")
+        console.log(otp)
         // const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
         //     otp,
         //     phoneNumber: validatedIdentifier
