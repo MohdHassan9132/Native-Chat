@@ -19,9 +19,8 @@ class AuthService {
         const generated = await otpService.generateOTP(challengeId,validatedPhonenumber,"phoneNumber","register");
         const activeChallengeId = generated.challengeId;
         if (generated.alreadyExists) return { challengeId: activeChallengeId, alreadyExists: true };
-        console.log(generated.otp)
         // const sendToUser = await smsService.sendSMS({
-        //     otp,
+        //     otp: generated.otp,
         //     phoneNumber: validatedPhonenumber
         // })
         // if(!sendToUser){
@@ -65,17 +64,17 @@ class AuthService {
         if(!isUser){
             throw new ApiError(404,"User not found")
         }
+        const username = isUser.name || "User"
         const challengeId = crypto.randomUUID()
         const generated = await otpService.generateOTP(challengeId,validatedIdentifier,identifierType,"login")
         if (generated.alreadyExists) return { challengeId: generated.challengeId, alreadyExists: true };
         const otp = generated.otp
-        // const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
-        //     otp,
-        //     phoneNumber: validatedIdentifier
-        // }): await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
-        //Not seding via SMS for testing
-        const sendToUser = identifierType === "phoneNumber" ? otp : await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
-        console.log(otp)
+        const sendToUser = identifierType === "phoneNumber" ? await smsService.sendSMS({
+            otp,
+            phoneNumber: validatedIdentifier
+        }): await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${isUser.name} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
+        //Not sending via SMS for testing
+        // const sendToUser = identifierType === "phoneNumber" ? otp : await nodemailerInstance.sendEmail(validatedIdentifier,`Dear ${username} Your NativeChat OTP is ${otp}`,`<h1> Your NativeChat OTP is ${otp} </h1>`)
         if(!sendToUser){
             throw new ApiError(503,"OTP service is unavailable")
         }

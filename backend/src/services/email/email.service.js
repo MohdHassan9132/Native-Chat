@@ -22,7 +22,6 @@ class nodemailerService extends emailService {
             subject,
             html: htmlBody,
         });
-        console.log("Email was sent successfully by nodemailer");
     }
 }
 
